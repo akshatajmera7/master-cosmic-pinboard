@@ -5,15 +5,36 @@
 
 import { neon } from 'https://esm.sh/@neondatabase/serverless@0.10.4';
 
-// Neon Cloud PostgreSQL Connection
-const NEON_DB_URL = 'postgresql://neondb_owner:npg_6WfFpjG7ZMOh@ep-mute-sea-b4sbskyd.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require';
-
-// Initialize Neon Client
+// Secure Neon Client Resolver (No credentials hardcoded in codebase)
 let sql = null;
-try {
-  sql = neon(NEON_DB_URL, { disableWarningInBrowsers: true });
-} catch (e) {
-  console.warn('Neon client initialization error:', e);
+let currentDbUrl = null;
+
+async function initNeonClient() {
+  // 1. Check user-configured URL in browser's private localStorage
+  let url = localStorage.getItem('cosmic_neon_db_url');
+
+  // 2. If not in localStorage, load from untracked config.js (ignored by Git)
+  if (!url) {
+    try {
+      const config = await import('./config.js');
+      if (config?.NEON_DB_URL && !config.NEON_DB_URL.includes('YOUR_PASSWORD')) {
+        url = config.NEON_DB_URL;
+      }
+    } catch (e) {
+      // config.js is untracked and omitted in public git repos
+    }
+  }
+
+  if (url && url.startsWith('postgres')) {
+    currentDbUrl = url;
+    try {
+      sql = neon(url, { disableWarningInBrowsers: true });
+      return true;
+    } catch (e) {
+      console.warn('Neon client initialization error:', e);
+    }
+  }
+  return false;
 }
 
 // Default Starter Seed Data (Used for instant first paint and initial DB seed)
@@ -120,7 +141,13 @@ class CosmicStore {
 
   // Sync entire store from Neon PostgreSQL Cloud DB
   async syncFromNeon() {
-    if (!sql) return;
+    if (!sql) {
+      const ok = await initNeonClient();
+      if (!ok) {
+        updateDbStatus('offline', 'Configure Neon DB');
+        return;
+      }
+    }
     updateDbStatus('syncing', 'Connecting...');
 
     try {
@@ -864,6 +891,53 @@ function setupEventListeners() {
       e.stopPropagation();
       showToast('Syncing with Neon DB...', 'sync');
       store.syncFromNeon();
+    });
+  }
+
+  // Open DB Settings Modal
+  const dbStatusPill = document.getElementById('neonDbStatusPill');
+  const dbSidebarBadge = document.getElementById('neonSidebarStatusBadge');
+  const openDbSettings = () => {
+    const input = document.getElementById('neonDbUrlInput');
+    if (input) input.value = currentDbUrl || localStorage.getItem('cosmic_neon_db_url') || '';
+    openModal('dbModal');
+  };
+
+  if (dbStatusPill) dbStatusPill.addEventListener('click', openDbSettings);
+  if (dbSidebarBadge && dbSidebarBadge.parentElement) {
+    dbSidebarBadge.parentElement.addEventListener('click', openDbSettings);
+    dbSidebarBadge.parentElement.style.cursor = 'pointer';
+  }
+
+  // Save DB URL
+  const saveDbUrlBtn = document.getElementById('saveDbUrlBtn');
+  if (saveDbUrlBtn) {
+    saveDbUrlBtn.addEventListener('click', async () => {
+      const input = document.getElementById('neonDbUrlInput');
+      const val = input ? input.value.trim() : '';
+      if (val && val.startsWith('postgres')) {
+        localStorage.setItem('cosmic_neon_db_url', val);
+        currentDbUrl = val;
+        sql = neon(val, { disableWarningInBrowsers: true });
+        closeModal('dbModal');
+        showToast('Connected to Neon DB!', 'cloud_done');
+        await store.syncFromNeon();
+      } else {
+        alert('Please enter a valid postgresql:// connection URL');
+      }
+    });
+  }
+
+  // Clear DB URL
+  const clearDbUrlBtn = document.getElementById('clearDbUrlBtn');
+  if (clearDbUrlBtn) {
+    clearDbUrlBtn.addEventListener('click', () => {
+      localStorage.removeItem('cosmic_neon_db_url');
+      currentDbUrl = null;
+      sql = null;
+      closeModal('dbModal');
+      updateDbStatus('offline', 'Configure Neon DB');
+      showToast('Reset to local mode', 'info');
     });
   }
 
