@@ -1,0 +1,402 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+:root {
+  --primary: #5300e7;
+  --primary-container: #6c38ff;
+  --secondary: #b71945;
+  --secondary-coral: #ff5376;
+  --secondary-soft: #ff8c94;
+  --tertiary-lemon: #fbe85f;
+  --mint: #45e5aa;
+  --lavender: #d7c7ff;
+  --peach: #ffb088;
+  --ink: #1a1a2e;
+  --ink-light: #484456;
+  --ink-muted: #797488;
+  --bg-mist: #fcf8ff;
+  --surface: #ffffff;
+  --surface-low: #f5f2ff;
+  --surface-high: #e8e5ff;
+  --border-width: 2px;
+  --neo-shadow: 4px 4px 0px #1a1a2e;
+  --neo-shadow-sm: 2px 2px 0px #1a1a2e;
+  --neo-shadow-lg: 6px 6px 0px #1a1a2e;
+  --neo-shadow-xl: 8px 8px 0px #1a1a2e;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--ink);
+  background-color: var(--bg-mist);
+  min-height: 100vh;
+  overflow-x: hidden;
+  user-select: none;
+}
+
+/* Typography classes */
+.font-display {
+  font-family: 'Space Grotesk', sans-serif;
+}
+.font-label {
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Corkboard Background Texture */
+.corkboard-canvas {
+  background-color: #f6eedb;
+  background-image: 
+    radial-gradient(#d5af76 1.8px, transparent 1.8px),
+    radial-gradient(#b98848 1.2px, transparent 1.2px),
+    radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 28px 28px, 14px 14px, 42px 42px;
+  background-position: 0 0, 7px 7px, 14px 14px;
+  min-height: calc(100vh - 72px);
+  position: relative;
+}
+
+/* Corkboard Subtle Vignette & Frame */
+.corkboard-canvas::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 100px rgba(139, 87, 42, 0.18), inset 0 0 20px rgba(26, 26, 46, 0.1);
+}
+
+/* Neo-Brutalist Structural Card */
+.neo-card {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
+  border: var(--border-width) solid var(--ink);
+  border-radius: 14px;
+  box-shadow: var(--neo-shadow);
+  transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1);
+  position: relative;
+}
+
+.neo-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--neo-shadow-lg);
+}
+
+.neo-card:active {
+  transform: translate(1px, 1px);
+  box-shadow: var(--neo-shadow-sm);
+}
+
+/* Neo Buttons */
+.neo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: var(--border-width) solid var(--ink);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: var(--neo-shadow-sm);
+  transition: all 0.15s ease;
+  text-decoration: none;
+  background: white;
+  color: var(--ink);
+}
+
+.neo-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--neo-shadow);
+}
+
+.neo-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px var(--ink);
+}
+
+.neo-btn-primary {
+  background: var(--primary-container);
+  color: #ffffff;
+}
+
+.neo-btn-primary:hover {
+  background: #5d22f6;
+  color: #ffffff;
+}
+
+.neo-btn-lemon {
+  background: var(--tertiary-lemon);
+  color: var(--ink);
+}
+
+.neo-btn-mint {
+  background: var(--mint);
+  color: var(--ink);
+}
+
+.neo-btn-coral {
+  background: var(--secondary-coral);
+  color: #ffffff;
+}
+
+.neo-btn-icon {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 10px;
+}
+
+/* Washi Tape Strips */
+.washi-tape {
+  position: absolute;
+  height: 18px;
+  z-index: 15;
+  border: 1px solid rgba(26, 26, 46, 0.25);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  opacity: 0.92;
+  pointer-events: none;
+}
+
+.washi-tape-mint {
+  background: rgba(69, 229, 170, 0.88);
+  clip-path: polygon(0% 4%, 98% 0%, 100% 96%, 2% 100%);
+}
+
+.washi-tape-sorbet {
+  background: rgba(251, 232, 95, 0.9);
+  clip-path: polygon(2% 0%, 98% 3%, 97% 98%, 0% 95%);
+}
+
+.washi-tape-lavender {
+  background: rgba(215, 199, 255, 0.9);
+  clip-path: polygon(1% 2%, 99% 0%, 98% 98%, 1% 96%);
+}
+
+.washi-tape-coral {
+  background: rgba(255, 140, 148, 0.88);
+  clip-path: polygon(0% 0%, 100% 2%, 98% 100%, 2% 98%);
+}
+
+/* Tactile 3D Enamel Push Pins */
+.pushpin {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  position: absolute;
+  z-index: 20;
+  border: 1.5px solid var(--ink);
+  box-shadow: 2px 3px 0px rgba(26, 26, 46, 0.85);
+  pointer-events: none;
+}
+
+.pushpin::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+}
+
+.pushpin-coral {
+  background: radial-gradient(circle at 35% 35%, #ff7e98, #d81648);
+}
+
+.pushpin-mint {
+  background: radial-gradient(circle at 35% 35%, #76f4c6, #1db17c);
+}
+
+.pushpin-violet {
+  background: radial-gradient(circle at 35% 35%, #9e75ff, #4711c2);
+}
+
+.pushpin-lemon {
+  background: radial-gradient(circle at 35% 35%, #fff280, #c8a800);
+}
+
+/* Lined Paper for Scratchpad */
+.lined-paper {
+  background-color: #ffffff;
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 27px,
+    #e4e1f7 28px
+  );
+  line-height: 28px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+}
+
+/* Tilted Sticky Notes */
+.sticky-note {
+  border: var(--border-width) solid var(--ink);
+  border-radius: 10px;
+  padding: 18px 16px 14px 16px;
+  position: relative;
+  box-shadow: var(--neo-shadow);
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
+  user-select: text;
+}
+
+.sticky-note:hover {
+  transform: rotate(0deg) scale(1.02) !important;
+  box-shadow: var(--neo-shadow-lg);
+  z-index: 30 !important;
+}
+
+.sticky-lemon { background-color: #fbe85f; }
+.sticky-mint { background-color: #45e5aa; }
+.sticky-lavender { background-color: #d7c7ff; }
+.sticky-coral { background-color: #ff8c94; }
+.sticky-peach { background-color: #ffc4a4; }
+.sticky-sky { background-color: #9fe7f5; }
+
+/* Drag and Drop Capabilities */
+.draggable-card {
+  cursor: grab;
+}
+
+.draggable-card:active {
+  cursor: grabbing;
+}
+
+.draggable-card.is-dragging {
+  opacity: 0.5;
+  transform: scale(0.98) rotate(-1deg);
+  box-shadow: var(--neo-shadow-xl);
+}
+
+.drop-target-active {
+  outline: 3px dashed var(--primary-container) !important;
+  outline-offset: 4px;
+  background-color: rgba(108, 56, 255, 0.05);
+}
+
+/* Neo Pill Badges */
+.neo-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  border: 1.5px solid var(--ink);
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  box-shadow: 1.5px 1.5px 0px var(--ink);
+}
+
+/* Modal Overlay */
+.neo-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 26, 46, 0.6);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.neo-modal-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.neo-modal {
+  background: white;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  box-shadow: 8px 8px 0px var(--ink);
+  width: 92%;
+  max-width: 520px;
+  transform: scale(0.95) translateY(10px);
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.neo-modal-backdrop.open .neo-modal {
+  transform: scale(1) translateY(0);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1edfa;
+}
+::-webkit-scrollbar-thumb {
+  background: #c2bbe0;
+  border: 1.5px solid var(--ink);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-container);
+}
+
+/* Animations */
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-pop {
+  animation: popIn 0.25s ease-out forwards;
+}
+
+/* Wordle Tile Grid Mini Component */
+.wordle-tile {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--ink);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.tile-green {
+  background-color: var(--mint);
+  color: var(--ink);
+}
+
+.tile-yellow {
+  background-color: var(--tertiary-lemon);
+  color: var(--ink);
+}
+
+.tile-gray {
+  background-color: #e2e0fc;
+  color: var(--ink);
+}
+
+/* Completed todo strike */
+.todo-completed .todo-text {
+  text-decoration: line-through;
+  opacity: 0.55;
+}
