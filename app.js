@@ -47,7 +47,8 @@ const DEFAULT_LINKS = [
   { id: 'l6', title: 'Hacker News', url: 'https://news.ycombinator.com', category: 'News', icon: 'newspaper', color: '#FF7139', clicks: 35 },
   { id: 'l7', title: 'Figma Projects', url: 'https://figma.com', category: 'Design', icon: 'draw', color: '#A259FF', clicks: 22 },
   { id: 'l8', title: 'Notion Workspace', url: 'https://notion.so', category: 'Tools', icon: 'description', color: '#2F3437', clicks: 48 },
-  { id: 'l9', title: 'Daily Chess Puzzle', url: 'https://www.chess.com/daily-chess-puzzle', category: 'Games', icon: 'sports_esports', color: '#D7C7FF', clicks: 17 }
+  { id: 'l9', title: 'Daily Chess Puzzle', url: 'https://www.chess.com/daily-chess-puzzle', category: 'Games', icon: 'sports_esports', color: '#D7C7FF', clicks: 17 },
+  { id: 'l_lexicon', title: 'Lexicon Vocabulary', url: 'https://lexicon-vocabulary-phi.vercel.app/', category: 'Tools', icon: 'menu_book', color: '#45E5AA', clicks: 0 }
 ];
 
 const DEFAULT_TODOS = [
