@@ -400,3 +400,37 @@ body {
   text-decoration: line-through;
   opacity: 0.55;
 }
+
+/* Toast Notifications */
+.neo-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #ffffff;
+  border: 2px solid var(--ink);
+  box-shadow: var(--neo-shadow);
+  border-radius: 12px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  z-index: 9999;
+  transform: translateY(60px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.25s ease;
+}
+
+.neo-toast.show {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.neon-glow {
+  box-shadow: 0 0 10px rgba(69, 229, 170, 0.6);
+}
+

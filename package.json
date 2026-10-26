@@ -1,0 +1,15 @@
+{
+  "name": "cosmic-corkboard",
+  "version": "1.0.0",
+  "description": "Daily Master Dashboard & Pinboard with Neon PostgreSQL Database",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4",
+    "dotenv": "^16.4.7",
+    "pg": "^8.13.3"
+  }
+}

@@ -1,9 +1,22 @@
 /**
  * Cosmic Corkboard - Master Daily Dashboard & Pinboard
- * State Management & Interactivity with LocalStorage Persistence
+ * Direct Neon PostgreSQL Cloud DB Persistence (Zero Backend / Serverless)
  */
 
-// Default Seed Data
+import { neon } from 'https://esm.sh/@neondatabase/serverless@0.10.4';
+
+// Neon Cloud PostgreSQL Connection
+const NEON_DB_URL = 'postgresql://neondb_owner:npg_6WfFpjG7ZMOh@ep-mute-sea-b4sbskyd.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require';
+
+// Initialize Neon Client
+let sql = null;
+try {
+  sql = neon(NEON_DB_URL, { disableWarningInBrowsers: true });
+} catch (e) {
+  console.warn('Neon client initialization error:', e);
+}
+
+// Default Starter Seed Data (Used for instant first paint and initial DB seed)
 const DEFAULT_LINKS = [
   { id: 'l1', title: 'Wordle (NYT)', url: 'https://www.nytimes.com/games/wordle/index.html', category: 'Games', icon: 'extension', color: '#45E5AA', clicks: 42 },
   { id: 'l2', title: 'NYT Connections', url: 'https://www.nytimes.com/games/connections', category: 'Games', icon: 'grid_view', color: '#FBE85F', clicks: 29 },
@@ -40,7 +53,7 @@ const DEFAULT_STICKIES = [
     color: 'sticky-mint',
     rotation: '2deg',
     pinColor: 'pushpin-violet',
-    content: '• Ship master dashboard pinboard\n• Custom URL bookmarks & tags\n• LocalStorage drag-and-drop state\n• Streak counters & Wordle widget'
+    content: '• Ship master dashboard pinboard\n• Custom URL bookmarks & tags\n• Direct Neon PostgreSQL persistence\n• Streak counters & Wordle widget'
   },
   {
     id: 's3',
@@ -72,51 +85,382 @@ const DEFAULT_HABITS = [
 const DEFAULT_SCRATCHPAD = `• Exploring tactile retro-futuristic digital corkboard
 • Draggable cards, quick link manager, and rapid todo capture
 • Keep all everyday links in one place: Wordle, Connections, GitHub, YouTube, Spotify
-• Autosave is active: whatever you write here stays saved!`;
+• Neon Cloud PostgreSQL sync active: everything is persisted in real time directly to DB!`;
 
-// App State
+// Master Store with Neon Cloud DB Sync & LocalStorage Fallback
 class CosmicStore {
   constructor() {
-    this.links = this.load('cosmic_links', DEFAULT_LINKS);
-    this.todos = this.load('cosmic_todos', DEFAULT_TODOS);
-    this.stickies = this.load('cosmic_stickies', DEFAULT_STICKIES);
-    this.habits = this.load('cosmic_habits', DEFAULT_HABITS);
-    this.scratchpad = this.load('cosmic_scratchpad', DEFAULT_SCRATCHPAD);
+    this.links = this.loadLocal('cosmic_links', DEFAULT_LINKS);
+    this.todos = this.loadLocal('cosmic_todos', DEFAULT_TODOS);
+    this.stickies = this.loadLocal('cosmic_stickies', DEFAULT_STICKIES);
+    this.habits = this.loadLocal('cosmic_habits', DEFAULT_HABITS);
+    this.scratchpad = this.loadLocal('cosmic_scratchpad', DEFAULT_SCRATCHPAD);
     this.activeCategory = 'All';
     this.searchQuery = '';
-    this.todoFilter = 'all'; // all, active, completed
+    this.todoFilter = 'all';
+    this.isConnected = false;
   }
 
-  load(key, fallback) {
+  loadLocal(key, fallback) {
     try {
       const data = localStorage.getItem(key);
       return data ? JSON.parse(data) : fallback;
     } catch (e) {
-      console.warn('Storage read failed', e);
       return fallback;
     }
   }
 
-  save(key, data) {
+  saveLocal(key, data) {
     try {
       localStorage.setItem(key, JSON.stringify(data));
     } catch (e) {
-      console.warn('Storage write failed', e);
+      console.warn('LocalStorage save failed', e);
+    }
+  }
+
+  // Sync entire store from Neon PostgreSQL Cloud DB
+  async syncFromNeon() {
+    if (!sql) return;
+    updateDbStatus('syncing', 'Connecting...');
+
+    try {
+      const [linksRes, todosRes, stickiesRes, habitsRes, scratchpadRes] = await Promise.all([
+        sql`SELECT id, title, url, category, icon, color, clicks, sort_order FROM cosmic_links ORDER BY sort_order ASC, created_at ASC`,
+        sql`SELECT id, text, tag, priority, completed, timestamp, sort_order FROM cosmic_todos ORDER BY sort_order ASC, created_at DESC`,
+        sql`SELECT id, title, tag, content, color, rotation, pin_color AS "pinColor", sort_order FROM cosmic_stickies ORDER BY sort_order ASC, created_at ASC`,
+        sql`SELECT id, title, streak, completed, color, sort_order FROM cosmic_habits ORDER BY sort_order ASC, created_at ASC`,
+        sql`SELECT content FROM cosmic_scratchpad WHERE id = 'main' LIMIT 1`
+      ]);
+
+      if (linksRes && linksRes.length > 0) {
+        this.links = linksRes;
+        this.saveLocal('cosmic_links', this.links);
+      }
+      if (todosRes && todosRes.length > 0) {
+        this.todos = todosRes;
+        this.saveLocal('cosmic_todos', this.todos);
+      }
+      if (stickiesRes && stickiesRes.length > 0) {
+        this.stickies = stickiesRes;
+        this.saveLocal('cosmic_stickies', this.stickies);
+      }
+      if (habitsRes && habitsRes.length > 0) {
+        this.habits = habitsRes;
+        this.saveLocal('cosmic_habits', this.habits);
+      }
+      if (scratchpadRes && scratchpadRes.length > 0 && scratchpadRes[0].content !== undefined) {
+        this.scratchpad = scratchpadRes[0].content;
+        this.saveLocal('cosmic_scratchpad', this.scratchpad);
+      }
+
+      this.isConnected = true;
+      updateDbStatus('connected', 'Neon DB Connected');
+      renderAll();
+    } catch (err) {
+      console.warn('Neon Cloud DB sync warning:', err);
+      this.isConnected = false;
+      updateDbStatus('offline', 'Offline Mode (Local)');
+    }
+  }
+
+  // --- LINKS ACTIONS ---
+  async addLink(link) {
+    this.links.push(link);
+    this.saveLocal('cosmic_links', this.links);
+    renderLinks();
+    showToast('Bookmark added!', 'bookmark_add');
+
+    if (sql) {
+      try {
+        await sql`
+          INSERT INTO cosmic_links (id, title, url, category, icon, color, clicks, sort_order)
+          VALUES (${link.id}, ${link.title}, ${link.url}, ${link.category}, ${link.icon}, ${link.color}, ${link.clicks || 0}, 
+                  (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM cosmic_links))
+          ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, url = EXCLUDED.url
+        `;
+        showToast('Saved to Neon DB', 'cloud_done');
+      } catch (err) {
+        console.error('Failed to add link to Neon DB:', err);
+      }
+    }
+  }
+
+  async deleteLink(linkId) {
+    this.links = this.links.filter(l => l.id !== linkId);
+    this.saveLocal('cosmic_links', this.links);
+    renderLinks();
+    showToast('Link removed', 'delete');
+
+    if (sql) {
+      try {
+        await sql`DELETE FROM cosmic_links WHERE id = ${linkId}`;
+      } catch (err) {
+        console.error('Failed to delete link from Neon DB:', err);
+      }
+    }
+  }
+
+  async incrementLinkClicks(linkId) {
+    const link = this.links.find(l => l.id === linkId);
+    if (link) {
+      link.clicks = (link.clicks || 0) + 1;
+      this.saveLocal('cosmic_links', this.links);
+      renderLinks();
+
+      if (sql) {
+        try {
+          await sql`UPDATE cosmic_links SET clicks = clicks + 1 WHERE id = ${linkId}`;
+        } catch (err) {
+          console.error('Failed to update clicks in Neon DB:', err);
+        }
+      }
+    }
+  }
+
+  async reorderLinks(newOrderedIds) {
+    this.links.sort((a, b) => newOrderedIds.indexOf(a.id) - newOrderedIds.indexOf(b.id));
+    this.saveLocal('cosmic_links', this.links);
+
+    if (sql) {
+      try {
+        for (let i = 0; i < newOrderedIds.length; i++) {
+          await sql`UPDATE cosmic_links SET sort_order = ${i + 1} WHERE id = ${newOrderedIds[i]}`;
+        }
+      } catch (err) {
+        console.error('Failed to reorder links in Neon DB:', err);
+      }
+    }
+  }
+
+  // --- TODOS ACTIONS ---
+  async addTodo(todo) {
+    this.todos.unshift(todo);
+    this.saveLocal('cosmic_todos', this.todos);
+    renderTodos();
+    updateTodoProgress();
+    showToast('Task added!', 'add_task');
+
+    if (sql) {
+      try {
+        await sql`
+          INSERT INTO cosmic_todos (id, text, tag, priority, completed, timestamp, sort_order)
+          VALUES (${todo.id}, ${todo.text}, ${todo.tag}, ${todo.priority}, ${todo.completed}, ${todo.timestamp}, 
+                  (SELECT COALESCE(MIN(sort_order), 0) - 1 FROM cosmic_todos))
+          ON CONFLICT (id) DO NOTHING
+        `;
+        showToast('Task saved to Neon DB', 'cloud_done');
+      } catch (err) {
+        console.error('Failed to add todo to Neon DB:', err);
+      }
+    }
+  }
+
+  async toggleTodo(todoId, completed) {
+    const todo = this.todos.find(t => t.id === todoId);
+    if (todo) {
+      todo.completed = completed;
+      this.saveLocal('cosmic_todos', this.todos);
+      renderTodos();
+      updateTodoProgress();
+
+      if (sql) {
+        try {
+          await sql`UPDATE cosmic_todos SET completed = ${completed} WHERE id = ${todoId}`;
+        } catch (err) {
+          console.error('Failed to toggle todo in Neon DB:', err);
+        }
+      }
+    }
+  }
+
+  async deleteTodo(todoId) {
+    this.todos = this.todos.filter(t => t.id !== todoId);
+    this.saveLocal('cosmic_todos', this.todos);
+    renderTodos();
+    updateTodoProgress();
+    showToast('Task deleted', 'delete');
+
+    if (sql) {
+      try {
+        await sql`DELETE FROM cosmic_todos WHERE id = ${todoId}`;
+      } catch (err) {
+        console.error('Failed to delete todo from Neon DB:', err);
+      }
+    }
+  }
+
+  // --- STICKIES ACTIONS ---
+  async addSticky(sticky) {
+    this.stickies.push(sticky);
+    this.saveLocal('cosmic_stickies', this.stickies);
+    renderStickies();
+    showToast('Memo pinned to corkboard!', 'push_pin');
+
+    if (sql) {
+      try {
+        await sql`
+          INSERT INTO cosmic_stickies (id, title, tag, content, color, rotation, pin_color, sort_order)
+          VALUES (${sticky.id}, ${sticky.title}, ${sticky.tag}, ${sticky.content}, ${sticky.color}, ${sticky.rotation}, ${sticky.pinColor}, 
+                  (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM cosmic_stickies))
+          ON CONFLICT (id) DO NOTHING
+        `;
+        showToast('Saved to Neon DB', 'cloud_done');
+      } catch (err) {
+        console.error('Failed to add sticky to Neon DB:', err);
+      }
+    }
+  }
+
+  async editSticky(stickyId, newContent) {
+    const sticky = this.stickies.find(s => s.id === stickyId);
+    if (sticky) {
+      sticky.content = newContent;
+      this.saveLocal('cosmic_stickies', this.stickies);
+      renderStickies();
+      showToast('Memo updated!', 'check');
+
+      if (sql) {
+        try {
+          await sql`UPDATE cosmic_stickies SET content = ${newContent} WHERE id = ${stickyId}`;
+          showToast('Updated in Neon DB', 'cloud_done');
+        } catch (err) {
+          console.error('Failed to edit sticky in Neon DB:', err);
+        }
+      }
+    }
+  }
+
+  async deleteSticky(stickyId) {
+    this.stickies = this.stickies.filter(s => s.id !== stickyId);
+    this.saveLocal('cosmic_stickies', this.stickies);
+    renderStickies();
+    showToast('Memo unpinned', 'delete');
+
+    if (sql) {
+      try {
+        await sql`DELETE FROM cosmic_stickies WHERE id = ${stickyId}`;
+      } catch (err) {
+        console.error('Failed to delete sticky from Neon DB:', err);
+      }
+    }
+  }
+
+  async reorderStickies(newOrderedIds) {
+    this.stickies.sort((a, b) => newOrderedIds.indexOf(a.id) - newOrderedIds.indexOf(b.id));
+    this.saveLocal('cosmic_stickies', this.stickies);
+
+    if (sql) {
+      try {
+        for (let i = 0; i < newOrderedIds.length; i++) {
+          await sql`UPDATE cosmic_stickies SET sort_order = ${i + 1} WHERE id = ${newOrderedIds[i]}`;
+        }
+      } catch (err) {
+        console.error('Failed to reorder stickies in Neon DB:', err);
+      }
+    }
+  }
+
+  // --- HABITS ACTIONS ---
+  async toggleHabit(habitId) {
+    const habit = this.habits.find(h => h.id === habitId);
+    if (habit) {
+      habit.completed = !habit.completed;
+      if (habit.completed) habit.streak += 1;
+      else habit.streak = Math.max(0, habit.streak - 1);
+
+      this.saveLocal('cosmic_habits', this.habits);
+      renderHabits();
+
+      if (sql) {
+        try {
+          await sql`UPDATE cosmic_habits SET completed = ${habit.completed}, streak = ${habit.streak} WHERE id = ${habitId}`;
+        } catch (err) {
+          console.error('Failed to update habit in Neon DB:', err);
+        }
+      }
+    }
+  }
+
+  // --- SCRATCHPAD ACTIONS ---
+  async saveScratchpad(text) {
+    this.scratchpad = text;
+    this.saveLocal('cosmic_scratchpad', this.scratchpad);
+
+    if (sql) {
+      try {
+        await sql`
+          INSERT INTO cosmic_scratchpad (id, content, updated_at)
+          VALUES ('main', ${text}, NOW())
+          ON CONFLICT (id) DO UPDATE SET content = EXCLUDED.content, updated_at = NOW()
+        `;
+      } catch (err) {
+        console.error('Failed to save scratchpad in Neon DB:', err);
+      }
     }
   }
 }
 
 const store = new CosmicStore();
 
-// Initialize UI
+// UI Update Helpers
+function updateDbStatus(state, label) {
+  const dot = document.getElementById('neonDbDot');
+  const text = document.getElementById('neonDbText');
+  const badge = document.getElementById('neonSidebarStatusBadge');
+
+  if (text) text.textContent = label;
+
+  if (dot) {
+    dot.className = 'w-2.5 h-2.5 rounded-full';
+    if (state === 'connected') dot.classList.add('bg-emerald-500', 'animate-pulse');
+    else if (state === 'syncing') dot.classList.add('bg-amber-400', 'animate-ping');
+    else dot.classList.add('bg-gray-400');
+  }
+
+  if (badge) {
+    if (state === 'connected') {
+      badge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-400';
+      badge.textContent = 'SYNCED';
+    } else if (state === 'syncing') {
+      badge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-400';
+      badge.textContent = 'SYNCING';
+    } else {
+      badge.className = 'text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-700 border border-gray-400';
+      badge.textContent = 'LOCAL';
+    }
+  }
+}
+
+let toastTimeout;
+function showToast(message, icon = 'check_circle') {
+  const toast = document.getElementById('neoToast');
+  const iconEl = document.getElementById('neoToastIcon');
+  const textEl = document.getElementById('neoToastText');
+
+  if (!toast) return;
+
+  if (iconEl) iconEl.textContent = icon;
+  if (textEl) textEl.textContent = message;
+
+  toast.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2400);
+}
+
+// Initialize Dashboard UI
 document.addEventListener('DOMContentLoaded', () => {
   setupHeaderTime();
   renderAll();
   setupEventListeners();
   setupDragAndDrop();
+
+  // Connect to Neon Cloud Database
+  store.syncFromNeon();
 });
 
-// Real-time Date and Greeting
+// Real-time Date
 function setupHeaderTime() {
   const dateBadge = document.getElementById('currentDateBadge');
   const now = new Date();
@@ -126,7 +470,7 @@ function setupHeaderTime() {
   }
 }
 
-// Master Render Function
+// Master Render
 function renderAll() {
   renderLinks();
   renderTodos();
@@ -164,14 +508,14 @@ function renderLinks() {
           <span class="material-symbols-outlined text-xl text-on-surface">${link.icon || 'link'}</span>
         </div>
         <div class="flex items-center gap-1 opacity-80 group-hover:opacity-100">
-          <span class="neo-pill text-[10px] bg-white border border-on-surface px-1.5 py-0.5">${link.category}</span>
-          <button class="delete-link-btn w-6 h-6 flex items-center justify-center text-outline hover:text-secondary rounded hover:bg-surface-container" data-id="${link.id}" title="Remove link">
+          <span class="neo-pill text-[10px] bg-white border border-on-surface px-1.5 py-0.5">${escapeHtml(link.category)}</span>
+          <button class="delete-link-btn w-6 h-6 flex items-center justify-center text-outline hover:text-secondary rounded hover:bg-surface-container transition-colors" data-id="${link.id}" title="Delete Bookmark">
             <span class="material-symbols-outlined text-sm">close</span>
           </button>
         </div>
       </div>
       <div>
-        <h4 class="font-headline-sm font-bold text-sm text-on-surface truncate group-hover:text-primary transition-colors">${link.title}</h4>
+        <h4 class="font-headline-sm font-bold text-sm text-on-surface truncate group-hover:text-primary transition-colors">${escapeHtml(link.title)}</h4>
         <p class="text-[11px] text-outline truncate">${formatHostname(link.url)}</p>
       </div>
       <div class="mt-3 pt-2 border-t border-on-surface/20 flex items-center justify-between text-[11px] font-bold">
@@ -184,11 +528,20 @@ function renderLinks() {
       </div>
     `;
 
-    // Click whole card to open
+    // Click whole card to launch bookmark
     card.addEventListener('click', (e) => {
       if (e.target.closest('.delete-link-btn')) return;
-      incrementLinkClick(link.id);
+      store.incrementLinkClicks(link.id);
       window.open(link.url, '_blank', 'noopener,noreferrer');
+    });
+
+    // Delete bookmark
+    const deleteBtn = card.querySelector('.delete-link-btn');
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (confirm(`Remove "${link.title}" from bookmarks?`)) {
+        store.deleteLink(link.id);
+      }
     });
 
     container.appendChild(card);
@@ -202,7 +555,7 @@ function renderLinks() {
       <span class="material-symbols-outlined text-on-surface text-xl">add</span>
     </div>
     <span class="font-headline-sm font-bold text-xs text-on-surface">+ New Bookmark</span>
-    <span class="text-[10px] text-outline mt-0.5">Quick add link</span>
+    <span class="text-[10px] text-outline mt-0.5">Save to Neon DB</span>
   `;
   addTile.addEventListener('click', () => openModal('linkModal'));
   container.appendChild(addTile);
@@ -213,15 +566,6 @@ function formatHostname(url) {
     return new URL(url).hostname.replace('www.', '');
   } catch (e) {
     return url;
-  }
-}
-
-function incrementLinkClick(linkId) {
-  const link = store.links.find(l => l.id === linkId);
-  if (link) {
-    link.clicks = (link.clicks || 0) + 1;
-    store.save('cosmic_links', store.links);
-    renderLinks();
   }
 }
 
@@ -265,15 +609,15 @@ function renderTodos() {
           <span class="todo-text font-body-md text-sm text-on-surface font-semibold truncate ${todo.completed ? 'line-through text-outline' : ''}">${escapeHtml(todo.text)}</span>
           <div class="flex items-center gap-1.5 shrink-0">
             <span class="neo-pill text-[9px] px-1.5 py-0.5 ${priorityColors[todo.priority] || priorityColors.medium}">
-              ${todo.tag || 'Todo'}
+              ${escapeHtml(todo.tag || 'Todo')}
             </span>
-            <button class="delete-todo-btn w-5 h-5 flex items-center justify-center text-outline hover:text-secondary rounded" data-id="${todo.id}">
+            <button class="delete-todo-btn w-5 h-5 flex items-center justify-center text-outline hover:text-secondary rounded" data-id="${todo.id}" title="Delete task">
               <span class="material-symbols-outlined text-sm">delete</span>
             </button>
           </div>
         </div>
         <div class="flex items-center gap-2 mt-1 text-[11px] text-outline">
-          <span>${todo.timestamp || 'Today'}</span>
+          <span>${escapeHtml(todo.timestamp || 'Today')}</span>
           ${todo.priority === 'high' && !todo.completed ? '<span class="text-secondary font-bold flex items-center gap-0.5"><span class="material-symbols-outlined text-xs">alarm</span> Priority</span>' : ''}
         </div>
       </div>
@@ -282,20 +626,14 @@ function renderTodos() {
     // Toggle checkbox
     const checkbox = item.querySelector('.todo-checkbox');
     checkbox.addEventListener('change', () => {
-      todo.completed = checkbox.checked;
-      store.save('cosmic_todos', store.todos);
-      renderTodos();
-      updateTodoProgress();
+      store.toggleTodo(todo.id, checkbox.checked);
     });
 
     // Delete todo
     const deleteBtn = item.querySelector('.delete-todo-btn');
     deleteBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      store.todos = store.todos.filter(t => t.id !== todo.id);
-      store.save('cosmic_todos', store.todos);
-      renderTodos();
-      updateTodoProgress();
+      store.deleteTodo(todo.id);
     });
 
     container.appendChild(item);
@@ -332,8 +670,8 @@ function renderStickies() {
       <div class="flex items-center justify-between border-b border-on-surface/30 pb-1.5 mb-2">
         <span class="font-headline-sm text-xs font-bold uppercase tracking-wide text-on-surface">${escapeHtml(sticky.title)}</span>
         <div class="flex items-center gap-1">
-          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/70 border border-on-surface text-on-surface">${sticky.tag || '#note'}</span>
-          <button class="delete-sticky-btn w-5 h-5 flex items-center justify-center text-on-surface/70 hover:text-secondary rounded" data-id="${sticky.id}">
+          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/70 border border-on-surface text-on-surface">${escapeHtml(sticky.tag || '#note')}</span>
+          <button class="delete-sticky-btn w-5 h-5 flex items-center justify-center text-on-surface/70 hover:text-secondary rounded transition-colors" data-id="${sticky.id}" title="Unpin Memo">
             <span class="material-symbols-outlined text-xs">close</span>
           </button>
         </div>
@@ -341,26 +679,26 @@ function renderStickies() {
       <p class="font-body-md text-xs text-on-surface font-medium leading-relaxed whitespace-pre-line">${escapeHtml(sticky.content)}</p>
       <div class="mt-3 pt-1.5 border-t border-on-surface/20 flex justify-between items-center text-[10px] font-bold text-on-surface/70">
         <span>Pinned Memo</span>
-        <span class="material-symbols-outlined text-xs cursor-pointer hover:text-primary edit-sticky-btn" data-id="${sticky.id}">edit</span>
+        <button class="edit-sticky-btn flex items-center gap-0.5 hover:text-primary transition-colors cursor-pointer" data-id="${sticky.id}">
+          <span class="material-symbols-outlined text-xs">edit</span> Edit
+        </button>
       </div>
     `;
 
     // Delete sticky
     card.querySelector('.delete-sticky-btn').addEventListener('click', (e) => {
       e.stopPropagation();
-      store.stickies = store.stickies.filter(s => s.id !== sticky.id);
-      store.save('cosmic_stickies', store.stickies);
-      renderStickies();
+      if (confirm(`Unpin "${sticky.title}" memo?`)) {
+        store.deleteSticky(sticky.id);
+      }
     });
 
     // Quick edit sticky
     card.querySelector('.edit-sticky-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       const newContent = prompt('Edit sticky note content:', sticky.content);
-      if (newContent !== null) {
-        sticky.content = newContent;
-        store.save('cosmic_stickies', store.stickies);
-        renderStickies();
+      if (newContent !== null && newContent.trim() !== '') {
+        store.editSticky(sticky.id, newContent.trim());
       }
     });
 
@@ -398,11 +736,7 @@ function renderHabits() {
     // Toggle habit
     card.querySelector('.habit-toggle-btn').addEventListener('click', (e) => {
       e.stopPropagation();
-      habit.completed = !habit.completed;
-      if (habit.completed) habit.streak += 1;
-      else habit.streak = Math.max(0, habit.streak - 1);
-      store.save('cosmic_habits', store.habits);
-      renderHabits();
+      store.toggleHabit(habit.id);
     });
 
     container.appendChild(card);
@@ -420,19 +754,17 @@ function renderScratchpad() {
   textarea.addEventListener('input', () => {
     clearTimeout(saveTimeout);
     const saveIndicator = document.getElementById('autosaveBadge');
-    if (saveIndicator) saveIndicator.textContent = 'Saving...';
+    if (saveIndicator) saveIndicator.textContent = 'Saving to Neon DB...';
 
     saveTimeout = setTimeout(() => {
-      store.scratchpad = textarea.value;
-      store.save('cosmic_scratchpad', store.scratchpad);
-      if (saveIndicator) saveIndicator.textContent = 'Auto-saved';
-    }, 500);
+      store.saveScratchpad(textarea.value);
+      if (saveIndicator) saveIndicator.textContent = 'Auto-saved to Neon DB';
+    }, 600);
   });
 }
 
 // ----------------- DRAG AND DROP (MOVE STUFF) -----------------
 function setupDragAndDrop() {
-  const board = document.getElementById('mainCorkboardCanvas');
   let draggedEl = null;
 
   document.addEventListener('dragstart', (e) => {
@@ -453,7 +785,7 @@ function setupDragAndDrop() {
     document.querySelectorAll('.drop-target-active').forEach(el => el.classList.remove('drop-target-active'));
   });
 
-  // Allow reordering in stickies container
+  // Reordering stickies
   const stickiesContainer = document.getElementById('stickiesContainer');
   if (stickiesContainer) {
     stickiesContainer.addEventListener('dragover', (e) => {
@@ -475,15 +807,13 @@ function setupDragAndDrop() {
         } else {
           stickiesContainer.insertBefore(draggedEl, afterElement);
         }
-        // Save new order
         const newIds = Array.from(stickiesContainer.querySelectorAll('.sticky-note')).map(el => el.dataset.id);
-        store.stickies.sort((a, b) => newIds.indexOf(a.id) - newIds.indexOf(b.id));
-        store.save('cosmic_stickies', store.stickies);
+        store.reorderStickies(newIds);
       }
     });
   }
 
-  // Allow reordering in links grid
+  // Reordering links
   const linksGrid = document.getElementById('linksGrid');
   if (linksGrid) {
     linksGrid.addEventListener('dragover', (e) => {
@@ -505,10 +835,8 @@ function setupDragAndDrop() {
         } else {
           linksGrid.insertBefore(draggedEl, afterElement);
         }
-        // Save new order
         const newIds = Array.from(linksGrid.querySelectorAll('.neo-card')).map(el => el.dataset.id).filter(Boolean);
-        store.links.sort((a, b) => newIds.indexOf(a.id) - newIds.indexOf(b.id));
-        store.save('cosmic_links', store.links);
+        store.reorderLinks(newIds);
       }
     });
   }
@@ -529,6 +857,16 @@ function getDragAfterElement(container, y) {
 
 // ----------------- EVENT LISTENERS & FORMS -----------------
 function setupEventListeners() {
+  // Manual Sync Button
+  const syncBtn = document.getElementById('neonManualSyncBtn');
+  if (syncBtn) {
+    syncBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showToast('Syncing with Neon DB...', 'sync');
+      store.syncFromNeon();
+    });
+  }
+
   // Global Search Input
   const searchInput = document.getElementById('globalSearchInput');
   if (searchInput) {
@@ -560,7 +898,7 @@ function setupEventListeners() {
       const text = rapidTaskInput.value.trim();
       if (!text) return;
       const now = new Date();
-      store.todos.unshift({
+      store.addTodo({
         id: 't_' + Date.now(),
         text: text,
         tag: 'Today',
@@ -568,10 +906,7 @@ function setupEventListeners() {
         completed: false,
         timestamp: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
-      store.save('cosmic_todos', store.todos);
       rapidTaskInput.value = '';
-      renderTodos();
-      updateTodoProgress();
     };
 
     rapidTaskBtn.addEventListener('click', addTask);
@@ -580,7 +915,7 @@ function setupEventListeners() {
     });
   }
 
-  // Todo Filter Tabs (All / Active / Completed)
+  // Todo Filter Tabs
   document.querySelectorAll('.todo-tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.todo-tab-btn').forEach(b => b.classList.remove('border-primary', 'font-bold'));
@@ -611,7 +946,7 @@ function setupEventListeners() {
         url = 'https://' + url;
       }
 
-      store.links.push({
+      store.addLink({
         id: 'l_' + Date.now(),
         title: titleInput.value.trim() || formatHostname(url),
         url: url,
@@ -621,10 +956,7 @@ function setupEventListeners() {
         clicks: 0
       });
 
-      store.save('cosmic_links', store.links);
-      renderLinks();
       closeModal('linkModal');
-      // Reset inputs
       titleInput.value = '';
       urlInput.value = '';
     });
@@ -651,7 +983,7 @@ function setupEventListeners() {
       const pinColors = ['pushpin-coral', 'pushpin-mint', 'pushpin-violet', 'pushpin-lemon'];
       const randomPin = pinColors[Math.floor(Math.random() * pinColors.length)];
 
-      store.stickies.push({
+      store.addSticky({
         id: 's_' + Date.now(),
         title: titleInput.value.trim() || 'Quick Note',
         tag: tagInput.value.trim() || '#note',
@@ -661,8 +993,6 @@ function setupEventListeners() {
         pinColor: randomPin
       });
 
-      store.save('cosmic_stickies', store.stickies);
-      renderStickies();
       closeModal('stickyModal');
       titleInput.value = '';
       contentInput.value = '';
