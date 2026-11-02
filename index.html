@@ -83,28 +83,31 @@
           <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
             <span class="material-symbols-outlined text-lg">search</span>
           </span>
-          <input id="globalSearchInput" class="w-full pl-9 pr-3 py-1.5 bg-white border-2 border-on-surface text-on-surface placeholder:text-outline text-xs rounded-lg shadow-[2px_2px_0px_#1a1a2e] focus:outline-none focus:border-primary focus:shadow-[3px_3px_0px_#6c38ff] transition-all" placeholder="Search links, todos, notes..." type="text"/>
+          <input id="globalSearchInput" class="w-full pl-9 pr-3 py-1.5 bg-white border-2 border-on-surface text-on-surface placeholder:text-outline text-xs rounded-lg shadow-[2px_2px_0px_#1a1a2e] focus:outline-none focus:border-primary focus:shadow-[3px_3px_0px_#6c38ff] transition-all" placeholder="Search links, games, todos, notes..." type="text"/>
         </div>
       </div>
 
-      <!-- Center Quick Navigation Tabs -->
-      <nav class="hidden lg:flex items-center gap-6">
-        <a class="text-primary border-b-2 border-primary pb-1 font-bold text-xs font-label uppercase tracking-wider hover:-translate-y-0.5 transition-transform" href="#rituals">
+      <!-- Center Quick Navigation Tabs (With Smooth Scroll) -->
+      <nav class="hidden lg:flex items-center gap-6" id="topNavBar">
+        <a class="nav-tab-link text-primary border-b-2 border-primary pb-1 font-bold text-xs font-label uppercase tracking-wider hover:-translate-y-0.5 transition-all" href="#rituals">
           Daily Launcher
         </a>
-        <a class="text-on-surface-variant hover:text-on-surface font-label font-bold text-xs uppercase tracking-wider hover:-translate-y-0.5 transition-transform" href="#mindset">
-          Quotes & Explore
+        <a class="nav-tab-link text-on-surface-variant hover:text-on-surface font-label font-bold text-xs uppercase tracking-wider hover:-translate-y-0.5 transition-all" href="#games">
+          Games & Puzzles
         </a>
-        <a class="text-on-surface-variant hover:text-on-surface font-label font-bold text-xs uppercase tracking-wider hover:-translate-y-0.5 transition-transform" href="#stickies">
+        <a class="nav-tab-link text-on-surface-variant hover:text-on-surface font-label font-bold text-xs uppercase tracking-wider hover:-translate-y-0.5 transition-all" href="#mindset">
+          Quotes
+        </a>
+        <a class="nav-tab-link text-on-surface-variant hover:text-on-surface font-label font-bold text-xs uppercase tracking-wider hover:-translate-y-0.5 transition-all" href="#stickies">
           Memos
         </a>
-        <a class="text-on-surface-variant hover:text-on-surface font-label font-bold text-xs uppercase tracking-wider hover:-translate-y-0.5 transition-transform" href="#tasks">
+        <a class="nav-tab-link text-on-surface-variant hover:text-on-surface font-label font-bold text-xs uppercase tracking-wider hover:-translate-y-0.5 transition-all" href="#tasks">
           To-Dos
         </a>
-        <a class="text-on-surface-variant hover:text-on-surface font-label font-bold text-xs uppercase tracking-wider hover:-translate-y-0.5 transition-transform" href="#scratchpad">
+        <a class="nav-tab-link text-on-surface-variant hover:text-on-surface font-label font-bold text-xs uppercase tracking-wider hover:-translate-y-0.5 transition-all" href="#scratchpad">
           Scratchpad
         </a>
-        <a class="text-on-surface-variant hover:text-on-surface font-label font-bold text-xs uppercase tracking-wider hover:-translate-y-0.5 transition-transform" href="#bookmarks">
+        <a class="nav-tab-link text-on-surface-variant hover:text-on-surface font-label font-bold text-xs uppercase tracking-wider hover:-translate-y-0.5 transition-all" href="#bookmarks">
           Master Links
         </a>
       </nav>
@@ -169,15 +172,19 @@
           </p>
         </div>
 
-        <!-- Navigation Links -->
-        <div class="flex flex-col gap-1.5">
+        <!-- Navigation Links (Connected to Smooth Scrolling) -->
+        <div class="flex flex-col gap-1.5" id="sidebarNavLinks">
           <a href="#rituals" class="flex items-center gap-2.5 px-3 py-2 rounded-lg bg-tertiary-fixed text-on-surface font-bold text-xs border-2 border-on-surface shadow-[2px_2px_0px_#1a1a2e] hover:-translate-y-0.5 transition-transform">
             <span class="material-symbols-outlined text-base">rocket_launch</span>
             <span>Daily Launcher</span>
           </a>
+          <a href="#games" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-white hover:text-on-surface font-bold text-xs transition-colors">
+            <span class="material-symbols-outlined text-base">sports_esports</span>
+            <span>Games & Puzzles</span>
+          </a>
           <a href="#mindset" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-white hover:text-on-surface font-bold text-xs transition-colors">
             <span class="material-symbols-outlined text-base">format_quote</span>
-            <span>Quotes & Explore</span>
+            <span>Elon Musk Quotes</span>
           </a>
           <a href="#stickies" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-white hover:text-on-surface font-bold text-xs transition-colors">
             <span class="material-symbols-outlined text-base">push_pin</span>
@@ -250,72 +257,43 @@
               <span class="material-symbols-outlined text-primary text-2xl">rocket_launch</span>
               <h2 class="font-headline-sm font-bold text-lg text-on-surface">Daily Rituals & Launchpad</h2>
             </div>
-            <span class="text-xs text-outline font-medium">Instant launch to music, podcasts & apps • Drag handle to reposition</span>
+            <span class="text-xs text-outline font-medium">Substack, music, podcasts & system design • Drag handle to reposition</span>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             
-            <!-- 1. Wordle Card with Mini Tiles & Direct Launch -->
-            <div id="card-wordle" class="neo-card p-4 relative flex flex-col justify-between draggable-box" data-box-id="card-wordle">
-              <div class="washi-tape washi-tape-mint w-16 -top-2.5 left-5"></div>
+            <!-- 1. Substack Daily Reading (Moved to Daily Rituals) -->
+            <div id="card-substack" class="neo-card p-4 relative flex flex-col justify-between draggable-box bg-white" data-box-id="card-substack">
+              <div class="washi-tape washi-tape-sorbet w-16 -top-2.5 left-5"></div>
               <div>
                 <div class="flex items-center justify-between mb-2">
                   <div class="flex items-center gap-1.5">
                     <span class="box-drag-handle" title="Drag to move card">
                       <span class="material-symbols-outlined text-sm text-outline">drag_indicator</span>
                     </span>
-                    <span class="font-label font-bold text-xs uppercase text-on-surface">Wordle #Daily</span>
+                    <span class="font-label font-bold text-xs uppercase text-on-surface">Substack</span>
                   </div>
-                  <span class="neo-pill text-[9px] bg-[#45E5AA] text-on-surface px-1.5 py-0.5">PUZZLE</span>
+                  <span class="neo-pill text-[9px] bg-[#FF6719] text-white px-1.5 py-0.5">DAILY READ</span>
                 </div>
-                <!-- Interactive Mini Tiles Display -->
-                <div class="grid grid-cols-5 gap-1 my-2.5">
-                  <div class="wordle-tile tile-gray">C</div>
-                  <div class="wordle-tile tile-yellow">R</div>
-                  <div class="wordle-tile tile-green">A</div>
-                  <div class="wordle-tile tile-gray">N</div>
-                  <div class="wordle-tile tile-green">E</div>
+                <div class="flex items-center gap-2.5 my-2">
+                  <div class="w-10 h-10 rounded-lg bg-[#FF6719] text-white flex items-center justify-center border-2 border-on-surface shrink-0 shadow-[2px_2px_0px_#1a1a2e]">
+                    <span class="material-symbols-outlined text-xl">newspaper</span>
+                  </div>
+                  <div class="overflow-hidden">
+                    <h4 class="font-bold text-xs truncate text-on-surface">Daily Intel & Essays</h4>
+                    <p class="text-[10px] text-outline truncate">Writers, newsletters & deep dives</p>
+                  </div>
                 </div>
-                <p class="text-[11px] text-outline text-center font-medium">Daily 5-letter word challenge</p>
+                <p class="text-[11px] text-outline text-center font-medium my-1">Top independent analysis</p>
               </div>
-              <a href="https://www.nytimes.com/games/wordle/index.html" target="_blank" rel="noopener noreferrer" class="neo-btn neo-btn-mint w-full text-center mt-3 text-xs py-1.5">
-                Play Wordle <span class="material-symbols-outlined text-xs">open_in_new</span>
+              <a href="https://substack.com" target="_blank" rel="noopener noreferrer" class="neo-btn w-full text-center mt-3 text-xs py-1.5 bg-[#FF6719] text-white hover:bg-[#e0560f] flex items-center justify-center gap-1 shadow-[2px_2px_0px_#1a1a2e]">
+                <span>Open Substack</span> <span class="material-symbols-outlined text-xs">open_in_new</span>
               </a>
             </div>
 
-            <!-- 2. NYT Connections Card -->
-            <div id="card-connections" class="neo-card p-4 relative flex flex-col justify-between draggable-box" data-box-id="card-connections">
-              <div class="washi-tape washi-tape-lavender w-16 -top-2.5 right-5"></div>
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <div class="flex items-center gap-1.5">
-                    <span class="box-drag-handle" title="Drag to move card">
-                      <span class="material-symbols-outlined text-sm text-outline">drag_indicator</span>
-                    </span>
-                    <span class="font-label font-bold text-xs uppercase text-on-surface">Connections</span>
-                  </div>
-                  <span class="neo-pill text-[9px] bg-tertiary-fixed text-on-surface px-1.5 py-0.5">NYT</span>
-                </div>
-                <div class="space-y-1 my-2">
-                  <div class="py-1 px-2 rounded bg-tertiary-fixed border border-on-surface text-[10px] font-bold truncate">
-                    🟨 WET WEATHER: Mist, Rain, Sleet
-                  </div>
-                  <div class="py-1 px-2 rounded bg-[#45E5AA] border border-on-surface text-[10px] font-bold truncate">
-                    🟩 SHIRT TYPES: Polo, Tee, Oxford
-                  </div>
-                  <div class="py-1 px-2 rounded bg-[#D7C7FF] border border-on-surface text-[10px] font-bold truncate">
-                    🟪 RHYMES BLUE: Clue, Due, Stew
-                  </div>
-                </div>
-              </div>
-              <a href="https://www.nytimes.com/games/connections" target="_blank" rel="noopener noreferrer" class="neo-btn neo-btn-lemon w-full text-center mt-3 text-xs py-1.5">
-                Solve Puzzle <span class="material-symbols-outlined text-xs">open_in_new</span>
-              </a>
-            </div>
-
-            <!-- 3. YouTube Music Widget (Opens Desktop or Phone App) -->
+            <!-- 2. YouTube Music Widget (Opens Desktop or Phone App ONLY) -->
             <div id="card-ytmusic" class="neo-card p-4 relative bg-[#1a1a2e] text-white flex flex-col justify-between draggable-box" data-box-id="card-ytmusic">
-              <div class="washi-tape washi-tape-sorbet w-14 -top-2.5 left-6"></div>
+              <div class="washi-tape washi-tape-mint w-14 -top-2.5 left-6"></div>
               <div>
                 <div class="flex items-center justify-between text-tertiary-fixed mb-2">
                   <div class="flex items-center gap-1.5">
@@ -343,14 +321,14 @@
                 </div>
               </div>
               <div class="flex flex-col gap-1.5 pt-2 border-t border-white/20 mt-1">
-                <button id="openYtMusicAppBtn" class="neo-btn w-full text-center text-xs py-1.5 bg-[#FF0000] text-white hover:bg-red-700 flex items-center justify-center gap-1 shadow-[2px_2px_0px_#ffffff]" title="Opens YouTube Music app on phone or desktop (with web fallback)">
+                <button id="openYtMusicAppBtn" class="neo-btn w-full text-center text-xs py-1.5 bg-[#FF0000] text-white hover:bg-red-700 flex items-center justify-center gap-1 shadow-[2px_2px_0px_#ffffff]" title="Opens YouTube Music app on phone or desktop">
                   <span class="material-symbols-outlined text-sm">headphones</span>
-                  <span>Open YT Music App</span>
+                  <span>Open App</span>
                 </button>
               </div>
             </div>
 
-            <!-- 4. Podcasts on YouTube Music (Replaces GitHub Sprint) -->
+            <!-- 3. Podcasts on YouTube Music (Opens App ONLY) -->
             <div id="card-podcasts" class="neo-card p-4 relative flex flex-col justify-between draggable-box" data-box-id="card-podcasts">
               <div class="washi-tape washi-tape-coral w-14 -top-2.5 right-6"></div>
               <div>
@@ -375,16 +353,16 @@
                 <!-- Curated Topic Tags -->
                 <div class="flex flex-wrap gap-1 mt-2">
                   <span class="text-[9px] px-1.5 py-0.5 rounded bg-surface-container-high border border-on-surface font-semibold">Lex Fridman</span>
-                  <span class="text-[9px] px-1.5 py-0.5 rounded bg-surface-container-high border border-on-surface font-semibold">Tech Deep Dives</span>
+                  <span class="text-[9px] px-1.5 py-0.5 rounded bg-surface-container-high border border-on-surface font-semibold">Huberman</span>
                   <span class="text-[9px] px-1.5 py-0.5 rounded bg-surface-container-high border border-on-surface font-semibold">All-In</span>
                 </div>
               </div>
-              <button id="openPodcastsBtn" class="neo-btn neo-btn-primary w-full text-center mt-3 text-xs py-1.5 flex items-center justify-center gap-1">
-                Open Podcasts <span class="material-symbols-outlined text-xs">mic</span>
+              <button id="openPodcastsBtn" class="neo-btn neo-btn-primary w-full text-center mt-3 text-xs py-1.5 flex items-center justify-center gap-1" title="Opens Podcasts section on YouTube Music app">
+                <span>Open App</span> <span class="material-symbols-outlined text-xs">mic</span>
               </button>
             </div>
 
-            <!-- 5. Media Queue & System Design Video Links -->
+            <!-- 4. Media Queue & System Design Video Links -->
             <div id="card-mediaqueue" class="neo-card p-4 relative flex flex-col justify-between draggable-box" data-box-id="card-mediaqueue">
               <div class="washi-tape washi-tape-mint w-14 -top-2.5 left-8"></div>
               <div>
@@ -414,27 +392,76 @@
               </div>
             </div>
 
+            <!-- 5. Krillion.io Interactive Platform -->
+            <div id="card-krillion" class="neo-card p-4 relative flex flex-col justify-between draggable-box" data-box-id="card-krillion">
+              <div class="washi-tape washi-tape-lavender w-14 -top-2.5 right-6"></div>
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <div class="flex items-center gap-1.5">
+                    <span class="box-drag-handle" title="Drag to move card">
+                      <span class="material-symbols-outlined text-sm text-outline">drag_indicator</span>
+                    </span>
+                    <span class="font-label font-bold text-xs uppercase text-on-surface">Krillion</span>
+                  </div>
+                  <span class="neo-pill text-[9px] bg-[#45E5AA] text-on-surface px-1.5 py-0.5">PLATFORM</span>
+                </div>
+                <div class="flex items-center gap-2.5 my-2">
+                  <div class="w-10 h-10 rounded-lg bg-[#45E5AA] border-2 border-on-surface flex items-center justify-center font-bold text-lg shrink-0 shadow-[2px_2px_0px_#1a1a2e]">
+                    ⚡
+                  </div>
+                  <div class="overflow-hidden">
+                    <h4 class="font-bold text-xs truncate text-on-surface">Krillion.io</h4>
+                    <p class="text-[10px] text-outline truncate">Interactive tools & discovery</p>
+                  </div>
+                </div>
+                <p class="text-[11px] text-outline text-center font-medium my-1">Creative web ecosystem</p>
+              </div>
+              <a href="https://krillion.io" target="_blank" rel="noopener noreferrer" class="neo-btn neo-btn-mint w-full text-center mt-3 text-xs py-1.5">
+                Launch Krillion <span class="material-symbols-outlined text-xs">open_in_new</span>
+              </a>
+            </div>
+
           </div>
         </section>
 
-        <!-- ================= ROW 2: QUOTES & EXPLORE (ELON MUSK, KRILLION, SPORCLE, SUBSTACK) ================= -->
-        <section id="mindset" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
-          <!-- Elon Musk Quotes Card (Col-span 7) -->
-          <div id="card-quotes" class="lg:col-span-7 neo-card p-5 relative flex flex-col justify-between draggable-box" data-box-id="card-quotes">
-            <div class="washi-tape washi-tape-lavender w-28 -top-2.5 left-8"></div>
+        <!-- ================= ROW 2: DAILY GAMES & PUZZLES (WORDLE, CONNECTIONS, CHAINLE, SPORCLE, CHESS) ================= -->
+        <section id="games" class="space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-2xl">sports_esports</span>
+              <div>
+                <h2 class="font-headline-sm font-bold text-lg text-on-surface">Daily Games & Puzzles</h2>
+                <p class="text-xs text-outline">Wordle, Connections, Chainle, Sporcle & custom puzzle games • Add or remove anytime</p>
+              </div>
+            </div>
+            <button id="addNewGameBtn" class="neo-btn neo-btn-lemon text-xs py-1.5 px-3 flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm font-bold">add</span>
+              <span>+ Add Game</span>
+            </button>
+          </div>
+
+          <!-- Dynamic Games Grid -->
+          <div id="gamesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <!-- Dynamically rendered games -->
+          </div>
+        </section>
+
+        <!-- ================= ROW 3: ELON MUSK BUILDER QUOTES ================= -->
+        <section id="mindset" class="space-y-3">
+          <div id="card-quotes" class="neo-card p-5 relative flex flex-col justify-between draggable-box" data-box-id="card-quotes">
+            <div class="washi-tape washi-tape-lavender w-32 -top-2.5 left-8"></div>
             <div>
               <div class="flex items-center justify-between border-b-2 border-on-surface pb-2.5 mb-3">
                 <div class="flex items-center gap-2">
                   <span class="box-drag-handle" title="Drag to move card">
                     <span class="material-symbols-outlined text-sm text-outline">drag_indicator</span>
                   </span>
-                  <div class="w-7 h-7 rounded bg-[#1a1a2e] text-white border border-on-surface flex items-center justify-center font-bold text-sm">
+                  <div class="w-8 h-8 rounded-lg bg-[#1a1a2e] text-white border-2 border-on-surface flex items-center justify-center font-bold text-sm shadow-[2px_2px_0px_#1a1a2e]">
                     🚀
                   </div>
                   <div>
-                    <h3 class="font-headline-sm font-bold text-base text-on-surface leading-tight">Elon Musk Insights</h3>
-                    <p class="text-[10px] text-outline">Principles for builders, physics & first-principles</p>
+                    <h3 class="font-headline-sm font-bold text-base text-on-surface leading-tight">Elon Musk Builder Insights</h3>
+                    <p class="text-[10px] text-outline">First-principles thinking, persistence & engineering physics</p>
                   </div>
                 </div>
                 <span id="elonQuoteTopic" class="neo-pill bg-tertiary-fixed text-[10px]">
@@ -469,84 +496,9 @@
               </button>
             </div>
           </div>
-
-          <!-- Explore & Games Card: Krillion.io, Sporcle World Quiz, Substack (Col-span 5) -->
-          <div id="card-explore" class="lg:col-span-5 neo-card p-5 relative flex flex-col justify-between draggable-box" data-box-id="card-explore">
-            <div class="washi-tape washi-tape-sorbet w-28 -top-2.5 right-8"></div>
-            <div>
-              <div class="flex items-center justify-between border-b-2 border-on-surface pb-2.5 mb-3">
-                <div class="flex items-center gap-2">
-                  <span class="box-drag-handle" title="Drag to move card">
-                    <span class="material-symbols-outlined text-sm text-outline">drag_indicator</span>
-                  </span>
-                  <div class="w-7 h-7 rounded bg-[#45E5AA] text-on-surface border border-on-surface flex items-center justify-center font-bold text-sm">
-                    🌐
-                  </div>
-                  <h3 class="font-headline-sm font-bold text-base text-on-surface">Explore & Games</h3>
-                </div>
-                <span class="neo-pill bg-[#45E5AA] text-[10px]">
-                  Interactive
-                </span>
-              </div>
-
-              <!-- Quick Link Tiles -->
-              <div class="space-y-2.5">
-                
-                <!-- 1. Krillion.io -->
-                <div class="p-2.5 rounded-xl bg-white border-2 border-on-surface shadow-[2px_2px_0px_#1a1a2e] flex items-center justify-between gap-3 hover:-translate-y-0.5 transition-transform">
-                  <div class="flex items-center gap-2.5 overflow-hidden">
-                    <div class="w-8 h-8 rounded-lg bg-[#45E5AA] border border-on-surface flex items-center justify-center font-bold text-sm shrink-0">
-                      ⚡
-                    </div>
-                    <div class="overflow-hidden">
-                      <h4 class="font-bold text-xs text-on-surface truncate">Krillion.io</h4>
-                      <p class="text-[10px] text-outline truncate">Interactive platform & tools</p>
-                    </div>
-                  </div>
-                  <a href="https://krillion.io" target="_blank" rel="noopener noreferrer" class="neo-btn text-[11px] py-1 px-2.5 bg-tertiary-fixed shrink-0">
-                    Open <span class="material-symbols-outlined text-xs">open_in_new</span>
-                  </a>
-                </div>
-
-                <!-- 2. Sporcle World Quiz -->
-                <div class="p-2.5 rounded-xl bg-white border-2 border-on-surface shadow-[2px_2px_0px_#1a1a2e] flex items-center justify-between gap-3 hover:-translate-y-0.5 transition-transform">
-                  <div class="flex items-center gap-2.5 overflow-hidden">
-                    <div class="w-8 h-8 rounded-lg bg-[#FBE85F] border border-on-surface flex items-center justify-center font-bold text-sm shrink-0">
-                      🌍
-                    </div>
-                    <div class="overflow-hidden">
-                      <h4 class="font-bold text-xs text-on-surface truncate">Sporcle World Quiz</h4>
-                      <p class="text-[10px] text-outline truncate">Countries of the World Challenge</p>
-                    </div>
-                  </div>
-                  <a href="https://www.sporcle.com/games/g/world" target="_blank" rel="noopener noreferrer" class="neo-btn text-[11px] py-1 px-2.5 bg-[#45E5AA] shrink-0">
-                    Play Quiz <span class="material-symbols-outlined text-xs">sports_esports</span>
-                  </a>
-                </div>
-
-                <!-- 3. Substack -->
-                <div class="p-2.5 rounded-xl bg-white border-2 border-on-surface shadow-[2px_2px_0px_#1a1a2e] flex items-center justify-between gap-3 hover:-translate-y-0.5 transition-transform">
-                  <div class="flex items-center gap-2.5 overflow-hidden">
-                    <div class="w-8 h-8 rounded-lg bg-[#FF6719] text-white border border-on-surface flex items-center justify-center font-bold text-sm shrink-0">
-                      <span class="material-symbols-outlined text-base">newspaper</span>
-                    </div>
-                    <div class="overflow-hidden">
-                      <h4 class="font-bold text-xs text-on-surface truncate">Substack</h4>
-                      <p class="text-[10px] text-outline truncate">Writers, newsletters & deep dives</p>
-                    </div>
-                  </div>
-                  <a href="https://substack.com" target="_blank" rel="noopener noreferrer" class="neo-btn text-[11px] py-1 px-2.5 bg-[#FFD7C7] shrink-0">
-                    Read <span class="material-symbols-outlined text-xs">feed</span>
-                  </a>
-                </div>
-
-              </div>
-            </div>
-          </div>
-
         </section>
 
-        <!-- ================= ROW 3: TACTILE STICKY NOTES ================= -->
+        <!-- ================= ROW 4: TACTILE STICKY NOTES ================= -->
         <section id="stickies" class="space-y-3">
           <div id="card-stickies" class="draggable-box" data-box-id="card-stickies">
             <div class="flex items-center justify-between mb-2">
@@ -572,11 +524,11 @@
           </div>
         </section>
 
-        <!-- ================= ROW 4: BENTO WORKSPACE (TO-DOS & SCRATCHPAD) ================= -->
+        <!-- ================= ROW 5: BENTO WORKSPACE (TO-DOS & SCRATCHPAD) ================= -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           <!-- LEFT: Interactive To-Do List (Col-span 5) -->
-          <div id="card-todos" class="lg:col-span-5 neo-card p-5 flex flex-col justify-between draggable-box" data-box-id="card-todos">
+          <div id="tasks" class="lg:col-span-5 neo-card p-5 flex flex-col justify-between draggable-box" data-box-id="card-todos">
             <div>
               <!-- Header -->
               <div class="flex items-center justify-between border-b-2 border-on-surface pb-3 mb-3">
@@ -617,7 +569,7 @@
           </div>
 
           <!-- RIGHT: Live Scratchpad (Col-span 7) -->
-          <div id="card-scratchpad" class="lg:col-span-7 neo-card p-5 relative flex flex-col justify-between draggable-box" data-box-id="card-scratchpad">
+          <div id="scratchpad" class="lg:col-span-7 neo-card p-5 relative flex flex-col justify-between draggable-box" data-box-id="card-scratchpad">
             <div class="washi-tape washi-tape-sorbet w-32 -top-2.5 left-1/2 -translate-x-1/2 flex items-center justify-center">
               <span class="text-[9px] font-bold uppercase tracking-widest text-on-surface/90">TACTILE MEMO</span>
             </div>
@@ -655,7 +607,7 @@
 
         </div>
 
-        <!-- ================= ROW 5: MASTER LINKS & BOOKMARKS SHELF ================= -->
+        <!-- ================= ROW 6: MASTER LINKS & BOOKMARKS SHELF ================= -->
         <section id="bookmarks" class="space-y-4 pb-12">
           <div id="card-bookmarks" class="draggable-box" data-box-id="card-bookmarks">
             <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
@@ -694,6 +646,59 @@
 
   </div>
 
+  <!-- ================= MODAL: ADD NEW GAME ================= -->
+  <div id="gameModal" class="neo-modal-backdrop">
+    <div class="neo-modal p-6 space-y-4 max-w-md w-full">
+      <div class="flex items-center justify-between border-b-2 border-on-surface pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-tertiary-fixed text-on-surface flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-base">sports_esports</span>
+          </div>
+          <h3 class="font-headline-md font-bold text-lg text-on-surface">Add Game / Puzzle</h3>
+        </div>
+        <button class="close-modal-btn text-outline hover:text-on-surface">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-on-surface mb-1">Game Name</label>
+          <input id="newGameTitle" type="text" placeholder="e.g. Chainle, Quordle, Chess" class="w-full px-3 py-2 rounded-lg bg-white border-2 border-on-surface text-xs focus:outline-none focus:border-primary shadow-[2px_2px_0px_#1a1a2e]"/>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-on-surface mb-1">Game URL</label>
+          <input id="newGameUrl" type="url" placeholder="https://chainle.io" class="w-full px-3 py-2 rounded-lg bg-white border-2 border-on-surface text-xs focus:outline-none focus:border-primary shadow-[2px_2px_0px_#1a1a2e]"/>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-on-surface mb-1">Category / Tag</label>
+            <input id="newGameCategory" type="text" placeholder="e.g. Word Chain, Daily Word" class="w-full px-3 py-2 rounded-lg bg-white border-2 border-on-surface text-xs focus:outline-none focus:border-primary shadow-[2px_2px_0px_#1a1a2e]"/>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-on-surface mb-1">Tile Color</label>
+            <select id="newGameColor" class="w-full px-3 py-2 rounded-lg bg-white border-2 border-on-surface text-xs focus:outline-none focus:border-primary shadow-[2px_2px_0px_#1a1a2e]">
+              <option value="#45E5AA">Mint Green</option>
+              <option value="#FBE85F">Lemon Yellow</option>
+              <option value="#D7C7FF">Lavender Lilac</option>
+              <option value="#FF8C94">Coral Pink</option>
+              <option value="#6C38FF">Electric Violet</option>
+              <option value="#9fe7f5">Sky Blue</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-on-surface/20">
+        <button class="close-modal-btn neo-btn text-xs py-1.5 px-3">Cancel</button>
+        <button id="addGameSubmitBtn" class="neo-btn neo-btn-lemon text-xs py-1.5 px-4">+ Add Game</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ================= MODAL: ADD NEW LINK ================= -->
   <div id="linkModal" class="neo-modal-backdrop">
     <div class="neo-modal p-6 space-y-4">
@@ -712,7 +717,7 @@
       <div class="space-y-3">
         <div>
           <label class="block text-xs font-bold text-on-surface mb-1">Title or Name</label>
-          <input id="newLinkTitle" type="text" placeholder="e.g. YouTube Music, Substack, Krillion" class="w-full px-3 py-2 rounded-lg bg-white border-2 border-on-surface text-xs focus:outline-none focus:border-primary shadow-[2px_2px_0px_#1a1a2e]"/>
+          <input id="newLinkTitle" type="text" placeholder="e.g. Chainle, Substack, Krillion" class="w-full px-3 py-2 rounded-lg bg-white border-2 border-on-surface text-xs focus:outline-none focus:border-primary shadow-[2px_2px_0px_#1a1a2e]"/>
         </div>
 
         <div>
@@ -751,7 +756,7 @@
           <label class="block text-xs font-bold text-on-surface mb-1">Material Icon</label>
           <select id="newLinkIcon" class="w-full px-3 py-2 rounded-lg bg-white border-2 border-on-surface text-xs focus:outline-none focus:border-primary shadow-[2px_2px_0px_#1a1a2e]">
             <option value="link">🔗 Link</option>
-            <option value="extension">🧩 Game / Puzzle</option>
+            <option value="sports_esports">🎮 Game / Puzzle</option>
             <option value="terminal">💻 Code / Dev</option>
             <option value="smart_display">📺 Video / Media</option>
             <option value="headphones">🎧 Audio / Music</option>
@@ -885,7 +890,7 @@
 
       <div class="space-y-3">
         <p class="text-xs text-on-surface-variant leading-relaxed">
-          Your connection string is stored safely in your personal browser storage and connects seamlessly to persist all your bookmarks, coordinates, notes, and tasks.
+          Your connection string is stored safely in your personal browser storage and connects seamlessly to persist all your bookmarks, games, coordinates, notes, and tasks.
         </p>
 
         <div>
