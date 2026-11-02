@@ -4,18 +4,19 @@
 A colorful, tactile master dashboard and pinboard inspired by retro-futuristic corkboards and neo-brutalist aesthetics.
 
 ## ✨ Features
-- **Neon Cloud PostgreSQL Persistence**: Direct serverless connection using `@neondatabase/serverless` over HTTPS (no Node server required!). Everything you add, edit, or delete is saved directly to your Neon database.
-- **Tilted Idea Stickies & Memos**: Draggable, colorful pastel notes pinned with metallic enamel pushpins and washi tape. Full add, inline edit, and delete sync with DB.
-- **Master Links & Bookmarks**: Categorized bookmarks (Games, Dev, Media, News, Tools, Design) with visit counters, quick launcher, add modal, and delete options.
-- **Master To-Dos**: Fast rapid task addition, priority tags, completion checkboxes, and strike-through progress tracking.
-- **Live Scratchpad**: Lined paper stream-of-consciousness scratchpad with debounced auto-save directly to Neon DB.
-- **Habit & Streak Tracker**: Daily streak counters with interactive completion toggles persisted to DB.
-- **Full Drag & Drop**: Freely organize stickies and bookmark tiles; order is saved directly to Neon DB.
-- **Offline Resiliency**: Optimistic UI with automatic local caching if offline, auto-reconnecting to Neon DB when network is active.
+- **Cloud PostgreSQL Persistence**: Direct serverless connection using `@neondatabase/serverless` over HTTPS. Everything you add, edit, or reposition is automatically synced to your cloud database.
+- **YouTube Music & Podcasts Launcher**: Quick launch widget that connects directly to the YouTube Music app (on phone and desktop) or web, plus a dedicated Podcasts launcher.
+- **Media Queue & System Design**: Curated system design and engineering video links (ByteByteGo, Gaurav Sen, Hussein Nasser, Martin Kleppmann), with the ability to add your own YouTube links.
+- **Elon Musk Builder Insights**: Rotating collection of inspiring first-principles quotes with quick copy actions.
+- **Interactive Explore & Games**: Quick-launch shelf featuring **Krillion.io**, **Sporcle Countries of the World Quiz**, and **Substack**.
+- **Freeform Draggable Canvas**: Every component and card can be moved anywhere on the corkboard. Coordinates (`x, y`) and layering (`z-index`) are saved and restored automatically on subsequent visits.
+- **Smooth Bookmark Grid Reordering**: Flawless multi-column drag-and-drop reordering with persistent cloud sync.
+- **Tactile Memos & Rapid To-Dos**: Clean, distraction-free task capture and sticky notes you can pin as you work.
+- **Live Scratchpad**: Lined paper stream-of-consciousness scratchpad with auto-save directly to the cloud.
 
 ## 🛠️ Tech Stack
 - HTML5, Modern Vanilla CSS, Tailwind CSS CDN
-- Neon PostgreSQL Serverless Driver (`@neondatabase/serverless`)
+- Cloud PostgreSQL Serverless Driver (`@neondatabase/serverless`)
 - Space Grotesk, Plus Jakarta Sans, Outfit Google Fonts
 - Material Symbols Outlined
-- Static deployment ready for Vercel, Netlify, or local browser opening
+- Static deployment ready for Vercel, Netlify, or local browser opening (`npm start`)

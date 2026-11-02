@@ -83,7 +83,7 @@
           <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
             <span class="material-symbols-outlined text-lg">search</span>
           </span>
-          <input id="globalSearchInput" class="w-full pl-9 pr-3 py-1.5 bg-white border-2 border-on-surface text-on-surface placeholder:text-outline text-xs rounded-lg shadow-[2px_2px_0px_#1a1a2e] focus:outline-none focus:border-primary focus:shadow-[3px_3px_0px_#6c38ff] transition-all" placeholder="Search links, todos, stickies..." type="text"/>
+          <input id="globalSearchInput" class="w-full pl-9 pr-3 py-1.5 bg-white border-2 border-on-surface text-on-surface placeholder:text-outline text-xs rounded-lg shadow-[2px_2px_0px_#1a1a2e] focus:outline-none focus:border-primary focus:shadow-[3px_3px_0px_#6c38ff] transition-all" placeholder="Search links, todos, notes..." type="text"/>
         </div>
       </div>
 
@@ -92,11 +92,14 @@
         <a class="text-primary border-b-2 border-primary pb-1 font-bold text-xs font-label uppercase tracking-wider hover:-translate-y-0.5 transition-transform" href="#rituals">
           Daily Launcher
         </a>
+        <a class="text-on-surface-variant hover:text-on-surface font-label font-bold text-xs uppercase tracking-wider hover:-translate-y-0.5 transition-transform" href="#mindset">
+          Quotes & Explore
+        </a>
         <a class="text-on-surface-variant hover:text-on-surface font-label font-bold text-xs uppercase tracking-wider hover:-translate-y-0.5 transition-transform" href="#stickies">
-          Memos & Notes
+          Memos
         </a>
         <a class="text-on-surface-variant hover:text-on-surface font-label font-bold text-xs uppercase tracking-wider hover:-translate-y-0.5 transition-transform" href="#tasks">
-          To-Do List
+          To-Dos
         </a>
         <a class="text-on-surface-variant hover:text-on-surface font-label font-bold text-xs uppercase tracking-wider hover:-translate-y-0.5 transition-transform" href="#scratchpad">
           Scratchpad
@@ -108,11 +111,11 @@
 
       <!-- Trailing Action Buttons -->
       <div class="flex items-center gap-2.5">
-        <!-- Live Neon Cloud DB Status Pill -->
-        <div id="neonDbStatusPill" class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border-2 border-on-surface shadow-[2px_2px_0px_#1a1a2e] text-xs font-bold transition-all" title="Neon PostgreSQL Cloud Persistence">
+        <!-- Live Cloud DB Status Pill (No brand names) -->
+        <div id="neonDbStatusPill" class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border-2 border-on-surface shadow-[2px_2px_0px_#1a1a2e] text-xs font-bold transition-all cursor-pointer" title="Cloud Database Connection">
           <span id="neonDbDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span id="neonDbText" class="text-on-surface">Neon DB Connected</span>
-          <button id="neonManualSyncBtn" class="text-outline hover:text-primary transition-colors flex items-center" title="Refresh from Neon DB">
+          <span id="neonDbText" class="text-on-surface">Cloud Synced</span>
+          <button id="neonManualSyncBtn" class="text-outline hover:text-primary transition-colors flex items-center" title="Sync with Cloud">
             <span class="material-symbols-outlined text-sm">sync</span>
           </button>
         </div>
@@ -147,22 +150,22 @@
           </div>
           <div class="flex flex-col overflow-hidden">
             <span class="font-headline-sm font-bold text-xs text-on-surface truncate">Personal Master</span>
-            <span class="text-[10px] text-outline truncate">Everything in one place</span>
+            <span class="text-[10px] text-outline truncate">Tactile Digital Canvas</span>
           </div>
         </div>
 
-        <!-- Neon Postgres Cloud DB Badge -->
-        <div class="p-2.5 rounded-xl bg-white border-2 border-on-surface shadow-[2px_2px_0px_#1a1a2e] flex flex-col gap-1">
+        <!-- Cloud Database Status Card -->
+        <div id="cloudDbCard" class="p-2.5 rounded-xl bg-white border-2 border-on-surface shadow-[2px_2px_0px_#1a1a2e] flex flex-col gap-1 cursor-pointer hover:border-primary transition-all">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-base text-primary">database</span>
-              <span class="font-headline-sm font-bold text-xs text-on-surface">Neon DB</span>
+              <span class="material-symbols-outlined text-base text-primary">cloud_done</span>
+              <span class="font-headline-sm font-bold text-xs text-on-surface">Cloud Database</span>
             </div>
-            <span id="neonSidebarStatusBadge" class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-400">CONNECTED</span>
+            <span id="neonSidebarStatusBadge" class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-400">SYNCED</span>
           </div>
           <p class="text-[10px] text-outline flex items-center gap-1">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            PostgreSQL 18 • Cloud Synced
+            Live Database • Auto Synced
           </p>
         </div>
 
@@ -172,13 +175,17 @@
             <span class="material-symbols-outlined text-base">rocket_launch</span>
             <span>Daily Launcher</span>
           </a>
+          <a href="#mindset" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-white hover:text-on-surface font-bold text-xs transition-colors">
+            <span class="material-symbols-outlined text-base">format_quote</span>
+            <span>Quotes & Explore</span>
+          </a>
           <a href="#stickies" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-white hover:text-on-surface font-bold text-xs transition-colors">
             <span class="material-symbols-outlined text-base">push_pin</span>
             <span>Sticky Memos</span>
           </a>
           <a href="#tasks" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-white hover:text-on-surface font-bold text-xs transition-colors">
             <span class="material-symbols-outlined text-base">check_box</span>
-            <span>Daily To-Dos</span>
+            <span>Master To-Dos</span>
           </a>
           <a href="#scratchpad" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-white hover:text-on-surface font-bold text-xs transition-colors">
             <span class="material-symbols-outlined text-base">stylus_note</span>
@@ -191,22 +198,14 @@
         </div>
       </div>
 
-      <!-- Dock Footer: Unbroken streak preview -->
+      <!-- Dock Footer: Quick Jump & Reset Coordinates -->
       <div class="pt-4 border-t-2 border-outline-variant flex flex-col gap-2">
-        <div class="p-2.5 rounded-xl bg-white border-2 border-on-surface shadow-[2px_2px_0px_#1a1a2e] flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <div class="w-7 h-7 rounded-full bg-secondary-container flex items-center justify-center border border-on-surface">
-              <span class="material-symbols-outlined text-sm text-on-surface" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
-            </div>
-            <div>
-              <p class="font-label font-bold text-[11px] text-on-surface">24 DAY STREAK</p>
-              <p class="text-[10px] text-outline">Wordle & Habits</p>
-            </div>
-          </div>
-          <span class="text-[10px] font-bold text-primary bg-primary-fixed px-1.5 py-0.5 rounded border border-on-surface">Active</span>
-        </div>
+        <button id="resetLayoutBtnSidebar" class="w-full neo-btn text-xs py-1.5 px-2 bg-white flex items-center justify-center gap-1.5" title="Reset all dragged boxes back to default layout">
+          <span class="material-symbols-outlined text-sm">restart_alt</span>
+          <span>Reset Layout</span>
+        </button>
         <div class="text-[10px] text-center text-outline font-medium">
-          Drag cards to move & organize!
+          Drag any card to reposition • Coordinates auto-saved!
         </div>
       </div>
     </aside>
@@ -229,39 +228,45 @@
             </h1>
           </div>
 
-          <!-- Playful retro sticker pills -->
+          <!-- Playful retro sticker pills & Layout controls -->
           <div class="flex flex-wrap items-center gap-2">
             <div class="neo-pill bg-[#45E5AA] text-on-surface -rotate-1">
-              ✦ FOCUS: 100%
+              ✦ FREESTYLE CANVAS
             </div>
             <div class="neo-pill bg-[#D7C7FF] text-on-surface rotate-1">
-              ☀️ READY TO SHIP
+              ☀️ CLOUD SYNCED
             </div>
-            <div class="neo-pill bg-[#FF8C94] text-on-surface -rotate-2">
-              🔥 24 DAYS UNBROKEN
-            </div>
+            <button id="resetLayoutBtnTop" class="neo-pill bg-[#FF8C94] text-on-surface hover:scale-105 active:scale-95 transition-transform flex items-center gap-1 cursor-pointer" title="Reset all box coordinates back to default grid">
+              <span class="material-symbols-outlined text-xs">restart_alt</span>
+              <span>Reset Positions</span>
+            </button>
           </div>
         </div>
 
-        <!-- ================= ROW 1: DAILY RITUALS & LAUNCHER ================= -->
+        <!-- ================= ROW 1: DAILY RITUALS & LAUNCHPAD ================= -->
         <section id="rituals" class="space-y-3">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <span class="material-symbols-outlined text-primary text-2xl">rocket_launch</span>
               <h2 class="font-headline-sm font-bold text-lg text-on-surface">Daily Rituals & Launchpad</h2>
             </div>
-            <span class="text-xs text-outline font-medium">Instant jump to everyday apps</span>
+            <span class="text-xs text-outline font-medium">Instant launch to music, podcasts & apps • Drag handle to reposition</span>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             
             <!-- 1. Wordle Card with Mini Tiles & Direct Launch -->
-            <div class="neo-card p-4 relative flex flex-col justify-between">
+            <div id="card-wordle" class="neo-card p-4 relative flex flex-col justify-between draggable-box" data-box-id="card-wordle">
               <div class="washi-tape washi-tape-mint w-16 -top-2.5 left-5"></div>
               <div>
                 <div class="flex items-center justify-between mb-2">
-                  <span class="font-label font-bold text-xs uppercase text-on-surface">Wordle #Daily</span>
-                  <span class="neo-pill text-[9px] bg-[#45E5AA] text-on-surface px-1.5 py-0.5">ACTIVE</span>
+                  <div class="flex items-center gap-1.5">
+                    <span class="box-drag-handle" title="Drag to move card">
+                      <span class="material-symbols-outlined text-sm text-outline">drag_indicator</span>
+                    </span>
+                    <span class="font-label font-bold text-xs uppercase text-on-surface">Wordle #Daily</span>
+                  </div>
+                  <span class="neo-pill text-[9px] bg-[#45E5AA] text-on-surface px-1.5 py-0.5">PUZZLE</span>
                 </div>
                 <!-- Interactive Mini Tiles Display -->
                 <div class="grid grid-cols-5 gap-1 my-2.5">
@@ -271,7 +276,7 @@
                   <div class="wordle-tile tile-gray">N</div>
                   <div class="wordle-tile tile-green">E</div>
                 </div>
-                <p class="text-[11px] text-outline text-center font-medium">Streak: 24 days unbroken</p>
+                <p class="text-[11px] text-outline text-center font-medium">Daily 5-letter word challenge</p>
               </div>
               <a href="https://www.nytimes.com/games/wordle/index.html" target="_blank" rel="noopener noreferrer" class="neo-btn neo-btn-mint w-full text-center mt-3 text-xs py-1.5">
                 Play Wordle <span class="material-symbols-outlined text-xs">open_in_new</span>
@@ -279,12 +284,17 @@
             </div>
 
             <!-- 2. NYT Connections Card -->
-            <div class="neo-card p-4 relative flex flex-col justify-between">
+            <div id="card-connections" class="neo-card p-4 relative flex flex-col justify-between draggable-box" data-box-id="card-connections">
               <div class="washi-tape washi-tape-lavender w-16 -top-2.5 right-5"></div>
               <div>
                 <div class="flex items-center justify-between mb-2">
-                  <span class="font-label font-bold text-xs uppercase text-on-surface">Connections</span>
-                  <span class="neo-pill text-[9px] bg-tertiary-fixed text-on-surface px-1.5 py-0.5">3/4 Solved</span>
+                  <div class="flex items-center gap-1.5">
+                    <span class="box-drag-handle" title="Drag to move card">
+                      <span class="material-symbols-outlined text-sm text-outline">drag_indicator</span>
+                    </span>
+                    <span class="font-label font-bold text-xs uppercase text-on-surface">Connections</span>
+                  </div>
+                  <span class="neo-pill text-[9px] bg-tertiary-fixed text-on-surface px-1.5 py-0.5">NYT</span>
                 </div>
                 <div class="space-y-1 my-2">
                   <div class="py-1 px-2 rounded bg-tertiary-fixed border border-on-surface text-[10px] font-bold truncate">
@@ -303,114 +313,277 @@
               </a>
             </div>
 
-            <!-- 3. Daily Spotify Player Widget -->
-            <div class="neo-card p-4 relative bg-[#1a1a2e] text-white flex flex-col justify-between">
+            <!-- 3. YouTube Music Widget (Opens Desktop or Phone App) -->
+            <div id="card-ytmusic" class="neo-card p-4 relative bg-[#1a1a2e] text-white flex flex-col justify-between draggable-box" data-box-id="card-ytmusic">
               <div class="washi-tape washi-tape-sorbet w-14 -top-2.5 left-6"></div>
               <div>
                 <div class="flex items-center justify-between text-tertiary-fixed mb-2">
                   <div class="flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-sm">graphic_eq</span>
-                    <span class="text-[10px] font-bold tracking-wider">DAILY LO-FI</span>
+                    <span class="box-drag-handle" title="Drag to move card">
+                      <span class="material-symbols-outlined text-sm text-white/60">drag_indicator</span>
+                    </span>
+                    <div class="flex items-center gap-1">
+                      <span class="eq-bar"></span>
+                      <span class="eq-bar"></span>
+                      <span class="eq-bar"></span>
+                      <span class="eq-bar"></span>
+                    </div>
+                    <span class="text-[10px] font-bold tracking-wider text-red-400">YT MUSIC</span>
                   </div>
-                  <span class="w-2 h-2 rounded-full bg-[#45E5AA] animate-pulse"></span>
+                  <span class="w-2 h-2 rounded-full bg-[#FF0000] animate-ping" title="Live audio engine"></span>
                 </div>
                 <div class="flex items-center gap-2.5 my-2">
-                  <div class="w-10 h-10 rounded-lg bg-primary-container border border-white flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-white text-lg">headphones</span>
+                  <div class="w-10 h-10 rounded-lg bg-red-600/90 border border-white flex items-center justify-center shrink-0 shadow-[2px_2px_0px_#ffffff]">
+                    <span class="material-symbols-outlined text-white text-xl">play_arrow</span>
                   </div>
                   <div class="overflow-hidden">
-                    <p class="font-bold text-xs truncate text-white">Orbiting Coffee Shop</p>
-                    <p class="text-[10px] text-outline-variant truncate">Cosmic Beats Collective</p>
+                    <p class="font-bold text-xs truncate text-white">YouTube Music</p>
+                    <p class="text-[10px] text-outline-variant truncate">Lo-Fi Beats & Daily Audio</p>
                   </div>
                 </div>
               </div>
-              <div class="flex items-center justify-between pt-2 border-t border-white/20 mt-1">
-                <span class="text-[10px] text-outline-variant">Focus Audio</span>
-                <a href="https://open.spotify.com" target="_blank" rel="noopener noreferrer" class="text-tertiary-fixed text-xs font-bold hover:underline flex items-center gap-0.5">
-                  Spotify <span class="material-symbols-outlined text-xs">play_circle</span>
+              <div class="flex flex-col gap-1.5 pt-2 border-t border-white/20 mt-1">
+                <button id="openYtMusicAppBtn" class="neo-btn w-full text-center text-xs py-1.5 bg-[#FF0000] text-white hover:bg-red-700 flex items-center justify-center gap-1 shadow-[2px_2px_0px_#ffffff]" title="Opens YouTube Music app on phone or desktop (with web fallback)">
+                  <span class="material-symbols-outlined text-sm">headphones</span>
+                  <span>Open YT Music App</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 4. Podcasts on YouTube Music (Replaces GitHub Sprint) -->
+            <div id="card-podcasts" class="neo-card p-4 relative flex flex-col justify-between draggable-box" data-box-id="card-podcasts">
+              <div class="washi-tape washi-tape-coral w-14 -top-2.5 right-6"></div>
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <div class="flex items-center gap-1.5">
+                    <span class="box-drag-handle" title="Drag to move card">
+                      <span class="material-symbols-outlined text-sm text-outline">drag_indicator</span>
+                    </span>
+                    <span class="font-label font-bold text-xs uppercase text-on-surface">Podcasts</span>
+                  </div>
+                  <span class="neo-pill text-[9px] bg-primary-container text-white px-1.5 py-0.5">AUDIO</span>
+                </div>
+                <div class="flex items-center gap-2.5 my-1">
+                  <div class="w-9 h-9 rounded-lg bg-primary-container text-white flex items-center justify-center border border-on-surface">
+                    <span class="material-symbols-outlined text-lg">podcasts</span>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-xs text-on-surface leading-tight">YT Music Podcasts</h4>
+                    <p class="text-[10px] text-outline">Tech, Science & Ideas</p>
+                  </div>
+                </div>
+                <!-- Curated Topic Tags -->
+                <div class="flex flex-wrap gap-1 mt-2">
+                  <span class="text-[9px] px-1.5 py-0.5 rounded bg-surface-container-high border border-on-surface font-semibold">Lex Fridman</span>
+                  <span class="text-[9px] px-1.5 py-0.5 rounded bg-surface-container-high border border-on-surface font-semibold">Tech Deep Dives</span>
+                  <span class="text-[9px] px-1.5 py-0.5 rounded bg-surface-container-high border border-on-surface font-semibold">All-In</span>
+                </div>
+              </div>
+              <button id="openPodcastsBtn" class="neo-btn neo-btn-primary w-full text-center mt-3 text-xs py-1.5 flex items-center justify-center gap-1">
+                Open Podcasts <span class="material-symbols-outlined text-xs">mic</span>
+              </button>
+            </div>
+
+            <!-- 5. Media Queue & System Design Video Links -->
+            <div id="card-mediaqueue" class="neo-card p-4 relative flex flex-col justify-between draggable-box" data-box-id="card-mediaqueue">
+              <div class="washi-tape washi-tape-mint w-14 -top-2.5 left-8"></div>
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <div class="flex items-center gap-1.5">
+                    <span class="box-drag-handle" title="Drag to move card">
+                      <span class="material-symbols-outlined text-sm text-outline">drag_indicator</span>
+                    </span>
+                    <span class="font-label font-bold text-xs uppercase text-on-surface">Media Queue</span>
+                  </div>
+                  <button id="addMediaQueueBtn" class="w-5 h-5 rounded flex items-center justify-center bg-tertiary-fixed border border-on-surface hover:scale-110 transition-transform" title="Add System Design or YouTube Link">
+                    <span class="material-symbols-outlined text-xs">add</span>
+                  </button>
+                </div>
+                <p class="text-[10px] text-outline mb-1.5">System Design & Tech Videos</p>
+                
+                <!-- Dynamic Queue Links List -->
+                <div id="mediaQueueList" class="space-y-1 max-h-[88px] overflow-y-auto pr-0.5">
+                  <!-- Dynamically populated system design & media links -->
+                </div>
+              </div>
+
+              <div class="flex items-center gap-1.5 mt-2.5">
+                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="neo-btn neo-btn-coral flex-1 text-center text-xs py-1.5">
+                  YouTube <span class="material-symbols-outlined text-xs">smart_display</span>
                 </a>
               </div>
             </div>
 
-            <!-- 4. GitHub Tracker Widget -->
-            <div class="neo-card p-4 relative flex flex-col justify-between">
-              <div class="washi-tape washi-tape-coral w-14 -top-2.5 right-6"></div>
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <span class="font-label font-bold text-xs uppercase text-on-surface">GitHub Sprint</span>
-                  <span class="neo-pill text-[9px] bg-primary-container text-white px-1.5 py-0.5">ACTIVE</span>
-                </div>
-                <div class="flex items-center gap-2 my-1">
-                  <div class="text-2xl font-bold font-headline-md text-on-surface">32</div>
-                  <span class="text-[11px] text-outline font-medium">days commit streak 🔥</span>
-                </div>
-                <!-- Mini Commit Matrix Grid -->
-                <div class="grid grid-cols-7 gap-1 mt-2">
-                  <div class="w-3.5 h-3.5 rounded bg-surface-container border border-on-surface"></div>
-                  <div class="w-3.5 h-3.5 rounded bg-[#45E5AA]/50 border border-on-surface"></div>
-                  <div class="w-3.5 h-3.5 rounded bg-[#45E5AA] border border-on-surface"></div>
-                  <div class="w-3.5 h-3.5 rounded bg-[#45E5AA] border border-on-surface"></div>
-                  <div class="w-3.5 h-3.5 rounded bg-[#45E5AA] border border-on-surface"></div>
-                  <div class="w-3.5 h-3.5 rounded bg-[#45E5AA] border border-on-surface"></div>
-                  <div class="w-3.5 h-3.5 rounded bg-[#45E5AA] border border-on-surface"></div>
-                </div>
-              </div>
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="neo-btn neo-btn-primary w-full text-center mt-3 text-xs py-1.5">
-                Open GitHub <span class="material-symbols-outlined text-xs">open_in_new</span>
-              </a>
-            </div>
-
-            <!-- 5. YouTube / Watch Later -->
-            <div class="neo-card p-4 relative flex flex-col justify-between">
-              <div class="washi-tape washi-tape-mint w-14 -top-2.5 left-8"></div>
-              <div>
-                <div class="flex items-center justify-between mb-2">
-                  <span class="font-label font-bold text-xs uppercase text-on-surface">Media Queue</span>
-                  <span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
-                </div>
-                <div class="p-2 rounded-lg bg-surface-container-low border border-on-surface my-1">
-                  <p class="text-xs font-bold text-on-surface truncate">Thinking with Computers</p>
-                  <p class="text-[10px] text-outline">Design Philosophy • 3 queued</p>
-                </div>
-              </div>
-              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="neo-btn neo-btn-coral w-full text-center mt-3 text-xs py-1.5">
-                Open YouTube <span class="material-symbols-outlined text-xs">smart_display</span>
-              </a>
-            </div>
-
           </div>
         </section>
 
-        <!-- ================= ROW 2: TACTILE STICKY NOTES ================= -->
-        <section id="stickies" class="space-y-3">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-secondary text-2xl">push_pin</span>
-              <h2 class="font-headline-sm font-bold text-lg text-on-surface">Tilted Idea Stickies & Memos</h2>
+        <!-- ================= ROW 2: QUOTES & EXPLORE (ELON MUSK, KRILLION, SPORCLE, SUBSTACK) ================= -->
+        <section id="mindset" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          <!-- Elon Musk Quotes Card (Col-span 7) -->
+          <div id="card-quotes" class="lg:col-span-7 neo-card p-5 relative flex flex-col justify-between draggable-box" data-box-id="card-quotes">
+            <div class="washi-tape washi-tape-lavender w-28 -top-2.5 left-8"></div>
+            <div>
+              <div class="flex items-center justify-between border-b-2 border-on-surface pb-2.5 mb-3">
+                <div class="flex items-center gap-2">
+                  <span class="box-drag-handle" title="Drag to move card">
+                    <span class="material-symbols-outlined text-sm text-outline">drag_indicator</span>
+                  </span>
+                  <div class="w-7 h-7 rounded bg-[#1a1a2e] text-white border border-on-surface flex items-center justify-center font-bold text-sm">
+                    🚀
+                  </div>
+                  <div>
+                    <h3 class="font-headline-sm font-bold text-base text-on-surface leading-tight">Elon Musk Insights</h3>
+                    <p class="text-[10px] text-outline">Principles for builders, physics & first-principles</p>
+                  </div>
+                </div>
+                <span id="elonQuoteTopic" class="neo-pill bg-tertiary-fixed text-[10px]">
+                  Determination
+                </span>
+              </div>
+
+              <!-- Quote Content Box -->
+              <div class="p-4 rounded-xl bg-surface-container-low border-2 border-on-surface shadow-[2px_2px_0px_#1a1a2e] relative min-h-[90px] flex flex-col justify-center">
+                <span class="text-3xl text-primary/40 font-serif leading-none select-none">“</span>
+                <p id="elonQuoteText" class="font-body-md text-sm md:text-base font-semibold text-on-surface -mt-2 leading-relaxed">
+                  When something is important enough, you do it even if the odds are not in your favor.
+                </p>
+                <div class="flex items-center justify-between mt-2 pt-2 border-t border-on-surface/10 text-xs font-bold text-outline">
+                  <span class="text-on-surface flex items-center gap-1">
+                    <span class="text-primary font-bold">— Elon Musk</span>
+                    <span class="text-[10px] text-outline font-normal">(SpaceX • Tesla • xAI)</span>
+                  </span>
+                </div>
+              </div>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="text-xs text-outline hidden sm:inline">Drag to rearrange, click edit icon to revise</span>
-              <button onclick="openModal('stickyModal')" class="neo-btn neo-btn-lemon text-xs py-1 px-3">
-                + New Memo
+
+            <!-- Quote Actions -->
+            <div class="flex items-center justify-between pt-3 mt-2 border-t border-on-surface/20">
+              <button id="copyQuoteBtn" class="text-xs font-bold text-outline hover:text-primary flex items-center gap-1 transition-colors">
+                <span class="material-symbols-outlined text-sm">content_copy</span>
+                <span>Copy Quote</span>
+              </button>
+              <button id="nextQuoteBtn" class="neo-btn neo-btn-lemon text-xs py-1.5 px-3 flex items-center gap-1.5">
+                <span>Next Quote</span>
+                <span class="material-symbols-outlined text-sm">sync</span>
               </button>
             </div>
           </div>
 
-          <!-- Sticky Notes Grid (Interactive & Draggable) -->
-          <div id="stickiesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 pt-3">
-            <!-- Dynamic stickies loaded from store -->
+          <!-- Explore & Games Card: Krillion.io, Sporcle World Quiz, Substack (Col-span 5) -->
+          <div id="card-explore" class="lg:col-span-5 neo-card p-5 relative flex flex-col justify-between draggable-box" data-box-id="card-explore">
+            <div class="washi-tape washi-tape-sorbet w-28 -top-2.5 right-8"></div>
+            <div>
+              <div class="flex items-center justify-between border-b-2 border-on-surface pb-2.5 mb-3">
+                <div class="flex items-center gap-2">
+                  <span class="box-drag-handle" title="Drag to move card">
+                    <span class="material-symbols-outlined text-sm text-outline">drag_indicator</span>
+                  </span>
+                  <div class="w-7 h-7 rounded bg-[#45E5AA] text-on-surface border border-on-surface flex items-center justify-center font-bold text-sm">
+                    🌐
+                  </div>
+                  <h3 class="font-headline-sm font-bold text-base text-on-surface">Explore & Games</h3>
+                </div>
+                <span class="neo-pill bg-[#45E5AA] text-[10px]">
+                  Interactive
+                </span>
+              </div>
+
+              <!-- Quick Link Tiles -->
+              <div class="space-y-2.5">
+                
+                <!-- 1. Krillion.io -->
+                <div class="p-2.5 rounded-xl bg-white border-2 border-on-surface shadow-[2px_2px_0px_#1a1a2e] flex items-center justify-between gap-3 hover:-translate-y-0.5 transition-transform">
+                  <div class="flex items-center gap-2.5 overflow-hidden">
+                    <div class="w-8 h-8 rounded-lg bg-[#45E5AA] border border-on-surface flex items-center justify-center font-bold text-sm shrink-0">
+                      ⚡
+                    </div>
+                    <div class="overflow-hidden">
+                      <h4 class="font-bold text-xs text-on-surface truncate">Krillion.io</h4>
+                      <p class="text-[10px] text-outline truncate">Interactive platform & tools</p>
+                    </div>
+                  </div>
+                  <a href="https://krillion.io" target="_blank" rel="noopener noreferrer" class="neo-btn text-[11px] py-1 px-2.5 bg-tertiary-fixed shrink-0">
+                    Open <span class="material-symbols-outlined text-xs">open_in_new</span>
+                  </a>
+                </div>
+
+                <!-- 2. Sporcle World Quiz -->
+                <div class="p-2.5 rounded-xl bg-white border-2 border-on-surface shadow-[2px_2px_0px_#1a1a2e] flex items-center justify-between gap-3 hover:-translate-y-0.5 transition-transform">
+                  <div class="flex items-center gap-2.5 overflow-hidden">
+                    <div class="w-8 h-8 rounded-lg bg-[#FBE85F] border border-on-surface flex items-center justify-center font-bold text-sm shrink-0">
+                      🌍
+                    </div>
+                    <div class="overflow-hidden">
+                      <h4 class="font-bold text-xs text-on-surface truncate">Sporcle World Quiz</h4>
+                      <p class="text-[10px] text-outline truncate">Countries of the World Challenge</p>
+                    </div>
+                  </div>
+                  <a href="https://www.sporcle.com/games/g/world" target="_blank" rel="noopener noreferrer" class="neo-btn text-[11px] py-1 px-2.5 bg-[#45E5AA] shrink-0">
+                    Play Quiz <span class="material-symbols-outlined text-xs">sports_esports</span>
+                  </a>
+                </div>
+
+                <!-- 3. Substack -->
+                <div class="p-2.5 rounded-xl bg-white border-2 border-on-surface shadow-[2px_2px_0px_#1a1a2e] flex items-center justify-between gap-3 hover:-translate-y-0.5 transition-transform">
+                  <div class="flex items-center gap-2.5 overflow-hidden">
+                    <div class="w-8 h-8 rounded-lg bg-[#FF6719] text-white border border-on-surface flex items-center justify-center font-bold text-sm shrink-0">
+                      <span class="material-symbols-outlined text-base">newspaper</span>
+                    </div>
+                    <div class="overflow-hidden">
+                      <h4 class="font-bold text-xs text-on-surface truncate">Substack</h4>
+                      <p class="text-[10px] text-outline truncate">Writers, newsletters & deep dives</p>
+                    </div>
+                  </div>
+                  <a href="https://substack.com" target="_blank" rel="noopener noreferrer" class="neo-btn text-[11px] py-1 px-2.5 bg-[#FFD7C7] shrink-0">
+                    Read <span class="material-symbols-outlined text-xs">feed</span>
+                  </a>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ================= ROW 3: TACTILE STICKY NOTES ================= -->
+        <section id="stickies" class="space-y-3">
+          <div id="card-stickies" class="draggable-box" data-box-id="card-stickies">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <span class="box-drag-handle" title="Drag to move card">
+                  <span class="material-symbols-outlined text-sm text-outline">drag_indicator</span>
+                </span>
+                <span class="material-symbols-outlined text-secondary text-2xl">push_pin</span>
+                <h2 class="font-headline-sm font-bold text-lg text-on-surface">Tilted Idea Stickies & Memos</h2>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-outline hidden sm:inline">Add memos anytime • Drag & move anywhere</span>
+                <button onclick="openModal('stickyModal')" class="neo-btn neo-btn-lemon text-xs py-1 px-3">
+                  + New Memo
+                </button>
+              </div>
+            </div>
+
+            <!-- Sticky Notes Grid (Interactive & Draggable) -->
+            <div id="stickiesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 pt-1 min-h-[50px]">
+              <!-- Dynamic stickies loaded from store -->
+            </div>
           </div>
         </section>
 
-        <!-- ================= ROW 3: BENTO WORKSPACE ================= -->
+        <!-- ================= ROW 4: BENTO WORKSPACE (TO-DOS & SCRATCHPAD) ================= -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           <!-- LEFT: Interactive To-Do List (Col-span 5) -->
-          <div id="tasks" class="lg:col-span-5 neo-card p-5 flex flex-col justify-between">
+          <div id="card-todos" class="lg:col-span-5 neo-card p-5 flex flex-col justify-between draggable-box" data-box-id="card-todos">
             <div>
               <!-- Header -->
               <div class="flex items-center justify-between border-b-2 border-on-surface pb-3 mb-3">
                 <div class="flex items-center gap-2">
+                  <span class="box-drag-handle" title="Drag to move card">
+                    <span class="material-symbols-outlined text-sm text-outline">drag_indicator</span>
+                  </span>
                   <div class="w-7 h-7 rounded bg-primary-container text-white border border-on-surface flex items-center justify-center font-bold text-sm">
                     ✓
                   </div>
@@ -443,89 +616,76 @@
             </div>
           </div>
 
-          <!-- RIGHT: Live Scratchpad & Daily Habits (Col-span 7) -->
-          <div class="lg:col-span-7 flex flex-col gap-6">
-            
-            <!-- Live Scratchpad / Stream-of-Consciousness -->
-            <div id="scratchpad" class="neo-card p-5 relative">
-              <div class="washi-tape washi-tape-sorbet w-32 -top-2.5 left-1/2 -translate-x-1/2 flex items-center justify-center">
-                <span class="text-[9px] font-bold uppercase tracking-widest text-on-surface/90">TACTILE MEMO</span>
-              </div>
+          <!-- RIGHT: Live Scratchpad (Col-span 7) -->
+          <div id="card-scratchpad" class="lg:col-span-7 neo-card p-5 relative flex flex-col justify-between draggable-box" data-box-id="card-scratchpad">
+            <div class="washi-tape washi-tape-sorbet w-32 -top-2.5 left-1/2 -translate-x-1/2 flex items-center justify-center">
+              <span class="text-[9px] font-bold uppercase tracking-widest text-on-surface/90">TACTILE MEMO</span>
+            </div>
 
+            <div>
               <div class="flex items-center justify-between border-b-2 border-on-surface pb-3 mb-3">
                 <div class="flex items-center gap-2">
+                  <span class="box-drag-handle" title="Drag to move card">
+                    <span class="material-symbols-outlined text-sm text-outline">drag_indicator</span>
+                  </span>
                   <span class="material-symbols-outlined text-primary text-xl">stylus_note</span>
-                  <h3 class="font-headline-sm font-bold text-base text-on-surface">Live Scratchpad & Random Stuff</h3>
+                  <h3 class="font-headline-sm font-bold text-base text-on-surface">Live Scratchpad & Stream of Notes</h3>
                 </div>
                 <div class="flex items-center gap-2">
                   <span id="autosaveBadge" class="neo-pill bg-[#45E5AA] text-[10px]">
                     Auto-saved
                   </span>
-                  <button onclick="document.getElementById('scratchpadText').value=''; store.scratchpad=''; store.save('cosmic_scratchpad','');" class="text-outline hover:text-secondary text-xs font-bold" title="Clear notes">
+                  <button id="clearScratchpadBtn" class="text-outline hover:text-secondary text-xs font-bold" title="Clear notes">
                     Clear
                   </button>
                 </div>
               </div>
 
               <!-- Lined Paper Textarea -->
-              <textarea id="scratchpadText" class="lined-paper w-full p-3 rounded-lg border-2 border-on-surface/30 min-h-[160px] focus:outline-none focus:border-primary resize-none text-sm text-on-surface font-medium leading-[28px]" placeholder="Type random thoughts, brain dumps, temporary links or ideas here..."></textarea>
-
-              <div class="flex items-center justify-between mt-2 pt-2 text-[11px] text-outline font-bold">
-                <span>Everything you type here is stored automatically</span>
-                <span class="text-primary cursor-pointer hover:underline" onclick="navigator.clipboard.writeText(document.getElementById('scratchpadText').value); alert('Copied notes to clipboard!');">
-                  Copy all text
-                </span>
-              </div>
+              <textarea id="scratchpadText" class="lined-paper w-full p-3 rounded-lg border-2 border-on-surface/30 min-h-[190px] focus:outline-none focus:border-primary resize-none text-sm text-on-surface font-medium leading-[28px]" placeholder="Type random thoughts, brain dumps, temporary links or ideas here..."></textarea>
             </div>
 
-            <!-- Daily Habits & Streak Matrix -->
-            <div class="neo-card p-5">
-              <div class="flex items-center justify-between border-b-2 border-on-surface pb-3 mb-3">
-                <div class="flex items-center gap-2">
-                  <span class="material-symbols-outlined text-secondary text-xl" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
-                  <h3 class="font-headline-sm font-bold text-base text-on-surface">Daily Habits & Streaks</h3>
-                </div>
-                <span class="neo-pill bg-tertiary-fixed text-[10px]">
-                  Click Checkmark to Toggle
-                </span>
-              </div>
-
-              <!-- Habit Progress Grid -->
-              <div id="habitsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                <!-- Dynamically populated habits -->
-              </div>
+            <div class="flex items-center justify-between mt-2 pt-2 text-[11px] text-outline font-bold">
+              <span>Everything you type here is stored automatically</span>
+              <button id="copyScratchpadBtn" class="text-primary hover:underline font-bold">
+                Copy all text
+              </button>
             </div>
-
           </div>
 
         </div>
 
-        <!-- ================= ROW 4: MASTER LINKS & BOOKMARKS SHELF ================= -->
+        <!-- ================= ROW 5: MASTER LINKS & BOOKMARKS SHELF ================= -->
         <section id="bookmarks" class="space-y-4 pb-12">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-primary text-2xl">bookmark</span>
-              <div>
-                <h2 class="font-headline-sm font-bold text-lg text-on-surface">Master Links & Bookmark Shelf</h2>
-                <p class="text-xs text-outline">Drag tiles to organize • Single-click jump to any web destination</p>
+          <div id="card-bookmarks" class="draggable-box" data-box-id="card-bookmarks">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+              <div class="flex items-center gap-2">
+                <span class="box-drag-handle" title="Drag to move section">
+                  <span class="material-symbols-outlined text-sm text-outline">drag_indicator</span>
+                </span>
+                <span class="material-symbols-outlined text-primary text-2xl">bookmark</span>
+                <div>
+                  <h2 class="font-headline-sm font-bold text-lg text-on-surface">Master Links & Bookmark Shelf</h2>
+                  <p class="text-xs text-outline">Drag tiles smoothly to reorder • Single-click jump to any destination</p>
+                </div>
+              </div>
+
+              <!-- Category Filter Tabs -->
+              <div class="flex flex-wrap items-center gap-1.5">
+                <button class="category-filter-btn neo-pill bg-primary-container text-white cursor-pointer" data-category="All">All</button>
+                <button class="category-filter-btn neo-pill bg-white text-on-surface cursor-pointer" data-category="Games">Games</button>
+                <button class="category-filter-btn neo-pill bg-white text-on-surface cursor-pointer" data-category="Dev">Dev</button>
+                <button class="category-filter-btn neo-pill bg-white text-on-surface cursor-pointer" data-category="Media">Media</button>
+                <button class="category-filter-btn neo-pill bg-white text-on-surface cursor-pointer" data-category="News">News</button>
+                <button class="category-filter-btn neo-pill bg-white text-on-surface cursor-pointer" data-category="Tools">Tools</button>
+                <button class="category-filter-btn neo-pill bg-white text-on-surface cursor-pointer" data-category="General">General</button>
               </div>
             </div>
 
-            <!-- Category Filter Tabs -->
-            <div class="flex flex-wrap items-center gap-1.5">
-              <button class="category-filter-btn neo-pill bg-primary-container text-white cursor-pointer" data-category="All">All</button>
-              <button class="category-filter-btn neo-pill bg-white text-on-surface cursor-pointer" data-category="Games">Games</button>
-              <button class="category-filter-btn neo-pill bg-white text-on-surface cursor-pointer" data-category="Dev">Dev</button>
-              <button class="category-filter-btn neo-pill bg-white text-on-surface cursor-pointer" data-category="Media">Media</button>
-              <button class="category-filter-btn neo-pill bg-white text-on-surface cursor-pointer" data-category="News">News</button>
-              <button class="category-filter-btn neo-pill bg-white text-on-surface cursor-pointer" data-category="Tools">Tools</button>
-              <button class="category-filter-btn neo-pill bg-white text-on-surface cursor-pointer" data-category="Design">Design</button>
+            <!-- Dynamic Links Grid (Smooth multi-column dragging) -->
+            <div id="linksGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5">
+              <!-- Dynamically populated links -->
             </div>
-          </div>
-
-          <!-- Dynamic Links Grid -->
-          <div id="linksGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3.5">
-            <!-- Dynamically populated links -->
           </div>
         </section>
 
@@ -552,7 +712,7 @@
       <div class="space-y-3">
         <div>
           <label class="block text-xs font-bold text-on-surface mb-1">Title or Name</label>
-          <input id="newLinkTitle" type="text" placeholder="e.g. Daily Wordle, Notion, X/Twitter" class="w-full px-3 py-2 rounded-lg bg-white border-2 border-on-surface text-xs focus:outline-none focus:border-primary shadow-[2px_2px_0px_#1a1a2e]"/>
+          <input id="newLinkTitle" type="text" placeholder="e.g. YouTube Music, Substack, Krillion" class="w-full px-3 py-2 rounded-lg bg-white border-2 border-on-surface text-xs focus:outline-none focus:border-primary shadow-[2px_2px_0px_#1a1a2e]"/>
         </div>
 
         <div>
@@ -569,7 +729,6 @@
               <option value="Media">Media</option>
               <option value="News">News</option>
               <option value="Tools">Tools</option>
-              <option value="Design">Design</option>
               <option value="General">General</option>
             </select>
           </div>
@@ -582,7 +741,8 @@
               <option value="#D7C7FF">Lavender Lilac</option>
               <option value="#FF8C94">Coral Pink</option>
               <option value="#6C38FF">Electric Violet</option>
-              <option value="#FFB088">Juicy Peach</option>
+              <option value="#FF6719">Substack Orange</option>
+              <option value="#FF0000">YouTube Red</option>
             </select>
           </div>
         </div>
@@ -596,8 +756,9 @@
             <option value="smart_display">📺 Video / Media</option>
             <option value="headphones">🎧 Audio / Music</option>
             <option value="newspaper">📰 News / Digest</option>
-            <option value="draw">🎨 Design</option>
             <option value="description">📄 Doc / Note</option>
+            <option value="hub">⚡ Interactive Platform</option>
+            <option value="public">🌍 World / Geography</option>
           </select>
         </div>
       </div>
@@ -661,7 +822,53 @@
     </div>
   </div>
 
-  <!-- ================= MODAL: CONFIGURE NEON DB ================= -->
+  <!-- ================= MODAL: ADD MEDIA QUEUE LINK ================= -->
+  <div id="mediaQueueModal" class="neo-modal-backdrop">
+    <div class="neo-modal p-6 space-y-4 max-w-md w-full">
+      <div class="flex items-center justify-between border-b-2 border-on-surface pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-[#FF0000] text-white flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-base">video_library</span>
+          </div>
+          <h3 class="font-headline-md font-bold text-lg text-on-surface">Add to Media Queue</h3>
+        </div>
+        <button class="close-modal-btn text-outline hover:text-on-surface">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-on-surface mb-1">Video / Topic Title</label>
+          <input id="newMediaTitle" type="text" placeholder="e.g. Distributed Consensus (Raft/Paxos)" class="w-full px-3 py-2 rounded-lg bg-white border-2 border-on-surface text-xs focus:outline-none focus:border-primary shadow-[2px_2px_0px_#1a1a2e]"/>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-on-surface mb-1">YouTube / Resource URL</label>
+          <input id="newMediaUrl" type="url" placeholder="https://www.youtube.com/watch?v=..." class="w-full px-3 py-2 rounded-lg bg-white border-2 border-on-surface text-xs focus:outline-none focus:border-primary shadow-[2px_2px_0px_#1a1a2e]"/>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-on-surface mb-1">Category / Tag</label>
+          <select id="newMediaCategory" class="w-full px-3 py-2 rounded-lg bg-white border-2 border-on-surface text-xs focus:outline-none focus:border-primary shadow-[2px_2px_0px_#1a1a2e]">
+            <option value="System Design">System Design</option>
+            <option value="Architecture">Architecture</option>
+            <option value="Backend">Backend</option>
+            <option value="Distributed">Distributed Systems</option>
+            <option value="Talks">Tech Talks</option>
+            <option value="General">General Video</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-on-surface/20">
+        <button class="close-modal-btn neo-btn text-xs py-1.5 px-3">Cancel</button>
+        <button id="addMediaSubmitBtn" class="neo-btn neo-btn-primary text-xs py-1.5 px-4">+ Add to Queue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL: CLOUD DATABASE SETTINGS (No brand names) ================= -->
   <div id="dbModal" class="neo-modal-backdrop">
     <div class="neo-modal p-6 space-y-4 max-w-md w-full">
       <div class="flex items-center justify-between border-b-2 border-on-surface pb-3">
@@ -669,7 +876,7 @@
           <div class="w-8 h-8 rounded-lg bg-[#45E5AA] text-on-surface flex items-center justify-center font-bold">
             💾
           </div>
-          <h3 class="font-headline-md font-bold text-lg text-on-surface">Neon DB Settings</h3>
+          <h3 class="font-headline-md font-bold text-lg text-on-surface">Cloud Database Settings</h3>
         </div>
         <button class="close-modal-btn text-outline hover:text-on-surface">
           <span class="material-symbols-outlined">close</span>
@@ -678,12 +885,12 @@
 
       <div class="space-y-3">
         <p class="text-xs text-on-surface-variant leading-relaxed">
-          Your connection string is stored safely in your personal browser local storage and will <strong>never</strong> be committed or exposed to GitHub.
+          Your connection string is stored safely in your personal browser storage and connects seamlessly to persist all your bookmarks, coordinates, notes, and tasks.
         </p>
 
         <div>
-          <label class="block text-xs font-bold text-on-surface mb-1">Neon Database URL</label>
-          <input id="neonDbUrlInput" type="password" placeholder="postgresql://neondb_owner:password@ep-...neon.tech/neondb?sslmode=require" class="w-full px-3 py-2 rounded-lg bg-white border-2 border-on-surface text-xs focus:outline-none focus:border-primary shadow-[2px_2px_0px_#1a1a2e] font-mono"/>
+          <label class="block text-xs font-bold text-on-surface mb-1">Database Connection URL</label>
+          <input id="neonDbUrlInput" type="password" placeholder="postgresql://user:password@host/database?sslmode=require" class="w-full px-3 py-2 rounded-lg bg-white border-2 border-on-surface text-xs focus:outline-none focus:border-primary shadow-[2px_2px_0px_#1a1a2e] font-mono"/>
         </div>
       </div>
 
@@ -700,7 +907,7 @@
   <!-- Neo Toast Notification -->
   <div id="neoToast" class="neo-toast">
     <span id="neoToastIcon" class="material-symbols-outlined text-emerald-600 text-lg">check_circle</span>
-    <span id="neoToastText">Saved to Neon DB</span>
+    <span id="neoToastText">Saved to Cloud</span>
   </div>
 
   <!-- JavaScript (ES Module) -->

@@ -1,19 +1,19 @@
 /**
- * Cosmic Corkboard - Master Daily Dashboard & Pinboard
- * Direct Neon PostgreSQL Cloud DB Persistence (Zero Backend / Serverless)
+ * Cosmic Corkboard - Daily Master Dashboard & Pinboard
+ * Cloud PostgreSQL Persistence via Serverless HTTPS
  */
 
 import { neon } from 'https://esm.sh/@neondatabase/serverless@0.10.4';
 
-// Secure Neon Client Resolver (No credentials hardcoded in codebase)
+// Secure Database Client Resolver
 let sql = null;
 let currentDbUrl = null;
 
 async function initNeonClient() {
-  // 1. Check user-configured URL in browser's private localStorage
+  // 1. Check user-configured URL in browser localStorage
   let url = localStorage.getItem('cosmic_neon_db_url');
 
-  // 2. If not in localStorage, load from untracked config.js (ignored by Git)
+  // 2. If not in localStorage, load from untracked config.js
   if (!url) {
     try {
       const config = await import('./config.js');
@@ -21,7 +21,7 @@ async function initNeonClient() {
         url = config.NEON_DB_URL;
       }
     } catch (e) {
-      // config.js is untracked and omitted in public git repos
+      // config.js is optional in standalone deployments
     }
   }
 
@@ -31,96 +31,74 @@ async function initNeonClient() {
       sql = neon(url, { disableWarningInBrowsers: true });
       return true;
     } catch (e) {
-      console.warn('Neon client initialization error:', e);
+      console.warn('Database client initialization error:', e);
     }
   }
   return false;
 }
 
-// Default Starter Seed Data (Used for instant first paint and initial DB seed)
+// ----------------- DEFAULT SEED DATA -----------------
+
+// YouTube Music & Explore links included; Spotify & Figma removed as requested
 const DEFAULT_LINKS = [
   { id: 'l1', title: 'Wordle (NYT)', url: 'https://www.nytimes.com/games/wordle/index.html', category: 'Games', icon: 'extension', color: '#45E5AA', clicks: 42 },
   { id: 'l2', title: 'NYT Connections', url: 'https://www.nytimes.com/games/connections', category: 'Games', icon: 'grid_view', color: '#FBE85F', clicks: 29 },
   { id: 'l3', title: 'GitHub Dashboard', url: 'https://github.com', category: 'Dev', icon: 'terminal', color: '#6C38FF', clicks: 78 },
   { id: 'l4', title: 'YouTube Subscriptions', url: 'https://youtube.com', category: 'Media', icon: 'smart_display', color: '#FF5376', clicks: 64 },
-  { id: 'l5', title: 'Spotify Web Player', url: 'https://open.spotify.com', category: 'Media', icon: 'headphones', color: '#1DB954', clicks: 53 },
+  { id: 'l5', title: 'YouTube Music', url: 'https://music.youtube.com', category: 'Media', icon: 'headphones', color: '#FF0000', clicks: 53 },
   { id: 'l6', title: 'Hacker News', url: 'https://news.ycombinator.com', category: 'News', icon: 'newspaper', color: '#FF7139', clicks: 35 },
-  { id: 'l7', title: 'Figma Projects', url: 'https://figma.com', category: 'Design', icon: 'draw', color: '#A259FF', clicks: 22 },
+  { id: 'l_krillion', title: 'Krillion', url: 'https://krillion.io', category: 'Tools', icon: 'hub', color: '#45E5AA', clicks: 12 },
+  { id: 'l_sporcle', title: 'Sporcle World Quiz', url: 'https://www.sporcle.com/games/g/world', category: 'Games', icon: 'public', color: '#FBE85F', clicks: 19 },
+  { id: 'l_substack', title: 'Substack', url: 'https://substack.com', category: 'News', icon: 'newspaper', color: '#FF6719', clicks: 24 },
   { id: 'l8', title: 'Notion Workspace', url: 'https://notion.so', category: 'Tools', icon: 'description', color: '#2F3437', clicks: 48 },
   { id: 'l9', title: 'Daily Chess Puzzle', url: 'https://www.chess.com/daily-chess-puzzle', category: 'Games', icon: 'sports_esports', color: '#D7C7FF', clicks: 17 },
-  { id: 'l_lexicon', title: 'Lexicon Vocabulary', url: 'https://lexicon-vocabulary-phi.vercel.app/', category: 'Tools', icon: 'menu_book', color: '#45E5AA', clicks: 0 }
+  { id: 'l_lexicon', title: 'Lexicon Vocabulary', url: 'https://lexicon-vocabulary-phi.vercel.app/', category: 'Tools', icon: 'menu_book', color: '#45E5AA', clicks: 5 }
 ];
 
-const DEFAULT_TODOS = [
-  { id: 't1', text: 'Solve daily Wordle & NYT Connections', tag: 'Morning', priority: 'medium', completed: true, timestamp: '8:45 AM' },
-  { id: 't2', text: 'Review pull requests & sync GitHub sprint', tag: 'Dev', priority: 'high', completed: false, timestamp: '10:00 AM' },
-  { id: 't3', text: 'Finish reading 20 mins of design book', tag: 'Habit', priority: 'low', completed: true, timestamp: '12:30 PM' },
-  { id: 't4', text: 'Clean up bookmarks & sort inspiration shelf', tag: 'Organize', priority: 'medium', completed: false, timestamp: '2:15 PM' }
+// Master To-Dos start clean & empty as requested
+const DEFAULT_TODOS = [];
+
+// Sticky notes start empty as requested
+const DEFAULT_STICKIES = [];
+
+// Curated System Design & Tech Video Media Queue
+const DEFAULT_MEDIA_QUEUE = [
+  { id: 'q1', title: 'ByteByteGo: System Design & Microservices', url: 'https://www.youtube.com/@ByteByteGo', category: 'System Design', sort_order: 1 },
+  { id: 'q2', title: 'Gaurav Sen: System Design Foundations', url: 'https://www.youtube.com/@gkcs', category: 'Architecture', sort_order: 2 },
+  { id: 'q3', title: 'Hussein Nasser: Backend & Database Engineering', url: 'https://www.youtube.com/@hnasr', category: 'Backend', sort_order: 3 },
+  { id: 'q4', title: 'Martin Kleppmann: Distributed Systems Lectures', url: 'https://www.youtube.com/results?search_query=martin+kleppmann+distributed+systems', category: 'Distributed', sort_order: 4 }
 ];
 
-const DEFAULT_STICKIES = [
-  {
-    id: 's1',
-    title: 'Daily Mantra',
-    tag: '#philosophy',
-    color: 'sticky-lemon',
-    rotation: '-1.5deg',
-    pinColor: 'pushpin-coral',
-    content: '“Digital systems should retain the tactile friction of physical studio workboards. Move fast, keep agency, stay curious.”'
-  },
-  {
-    id: 's2',
-    title: 'Sprint Checklist',
-    tag: '#dev-flow',
-    color: 'sticky-mint',
-    rotation: '2deg',
-    pinColor: 'pushpin-violet',
-    content: '• Ship master dashboard pinboard\n• Custom URL bookmarks & tags\n• Direct Neon PostgreSQL persistence\n• Streak counters & Wordle widget'
-  },
-  {
-    id: 's3',
-    title: 'Idea Spark',
-    tag: '#inspiration',
-    color: 'sticky-lavender',
-    rotation: '-2deg',
-    pinColor: 'pushpin-lemon',
-    content: '“The brain organizes thoughts by spatial landmarks, tactile anchors, and vibrant visual hierarchy.”'
-  },
-  {
-    id: 's4',
-    title: 'Random Note',
-    tag: '#ideas',
-    color: 'sticky-coral',
-    rotation: '1.5deg',
-    pinColor: 'pushpin-mint',
-    content: 'Test out new lo-fi sound generator & add quick audio notes feature for future version.'
-  }
+// Curated Quotes by Elon Musk
+const ELON_QUOTES = [
+  { text: "When something is important enough, you do it even if the odds are not in your favor.", topic: "Determination" },
+  { text: "I think it is possible for ordinary people to choose to be extraordinary.", topic: "Potential" },
+  { text: "Persistence is very important. You should not give up unless you are forced to give up.", topic: "Resilience" },
+  { text: "Failure is an option here. If things are not failing, you are not innovating enough.", topic: "Innovation" },
+  { text: "The first step is to establish that something is possible; then probability will occur.", topic: "Vision" },
+  { text: "Constantly think about how you could be doing things better and questioning yourself.", topic: "Excellence" },
+  { text: "Some people don't like change, but you need to embrace change if the alternative is disaster.", topic: "Adaptability" }
 ];
 
-const DEFAULT_HABITS = [
-  { id: 'h1', title: 'Wordle Daily', streak: 24, completed: true, color: '#45E5AA' },
-  { id: 'h2', title: '20m Reading', streak: 18, completed: true, color: '#D7C7FF' },
-  { id: 'h3', title: 'Daily Workout', streak: 14, completed: true, color: '#FF5376' },
-  { id: 'h4', title: '2.5L Water Intake', streak: 30, completed: true, color: '#FBE85F' }
-];
+const DEFAULT_SCRATCHPAD = `• Tactile digital mission control & master corkboard
+• Draggable cards with saved coordinates, link manager, and rapid todo capture
+• Everyday quick access: Wordle, Connections, YouTube Music, Podcasts, System Design
+• Cloud synchronization active: all changes, positions, and notes sync seamlessly!`;
 
-const DEFAULT_SCRATCHPAD = `• Exploring tactile retro-futuristic digital corkboard
-• Draggable cards, quick link manager, and rapid todo capture
-• Keep all everyday links in one place: Wordle, Connections, GitHub, YouTube, Spotify
-• Neon Cloud PostgreSQL sync active: everything is persisted in real time directly to DB!`;
-
-// Master Store with Neon Cloud DB Sync & LocalStorage Fallback
+// ----------------- MASTER STORE -----------------
 class CosmicStore {
   constructor() {
     this.links = this.loadLocal('cosmic_links', DEFAULT_LINKS);
     this.todos = this.loadLocal('cosmic_todos', DEFAULT_TODOS);
     this.stickies = this.loadLocal('cosmic_stickies', DEFAULT_STICKIES);
-    this.habits = this.loadLocal('cosmic_habits', DEFAULT_HABITS);
+    this.mediaQueue = this.loadLocal('cosmic_media_queue', DEFAULT_MEDIA_QUEUE);
     this.scratchpad = this.loadLocal('cosmic_scratchpad', DEFAULT_SCRATCHPAD);
+    this.positions = this.loadLocal('cosmic_box_positions', {});
     this.activeCategory = 'All';
     this.searchQuery = '';
     this.todoFilter = 'all';
     this.isConnected = false;
+    this.currentQuoteIndex = Math.floor(Math.random() * ELON_QUOTES.length);
   }
 
   loadLocal(key, fallback) {
@@ -140,54 +118,107 @@ class CosmicStore {
     }
   }
 
-  // Sync entire store from Neon PostgreSQL Cloud DB
+  // Sync entire store from Cloud Database
   async syncFromNeon() {
     if (!sql) {
       const ok = await initNeonClient();
       if (!ok) {
-        updateDbStatus('offline', 'Configure Neon DB');
+        updateDbStatus('offline', 'Configure Cloud DB');
         return;
       }
     }
     updateDbStatus('syncing', 'Connecting...');
 
     try {
-      const [linksRes, todosRes, stickiesRes, habitsRes, scratchpadRes] = await Promise.all([
+      const [linksRes, todosRes, stickiesRes, mediaRes, scratchpadRes, positionsRes] = await Promise.all([
         sql`SELECT id, title, url, category, icon, color, clicks, sort_order FROM cosmic_links ORDER BY sort_order ASC, created_at ASC`,
         sql`SELECT id, text, tag, priority, completed, timestamp, sort_order FROM cosmic_todos ORDER BY sort_order ASC, created_at DESC`,
         sql`SELECT id, title, tag, content, color, rotation, pin_color AS "pinColor", sort_order FROM cosmic_stickies ORDER BY sort_order ASC, created_at ASC`,
-        sql`SELECT id, title, streak, completed, color, sort_order FROM cosmic_habits ORDER BY sort_order ASC, created_at ASC`,
-        sql`SELECT content FROM cosmic_scratchpad WHERE id = 'main' LIMIT 1`
+        sql`SELECT id, title, url, category, sort_order FROM cosmic_media_queue ORDER BY sort_order ASC, created_at ASC`,
+        sql`SELECT content FROM cosmic_scratchpad WHERE id = 'main' LIMIT 1`,
+        sql`SELECT id, x, y, z_index FROM cosmic_positions`
       ]);
 
       if (linksRes && linksRes.length > 0) {
-        this.links = linksRes;
+        // Filter out any lingering figma links
+        this.links = linksRes.filter(l => !l.title.toLowerCase().includes('figma'));
         this.saveLocal('cosmic_links', this.links);
       }
-      if (todosRes && todosRes.length > 0) {
+      if (todosRes) {
         this.todos = todosRes;
         this.saveLocal('cosmic_todos', this.todos);
       }
-      if (stickiesRes && stickiesRes.length > 0) {
+      if (stickiesRes) {
         this.stickies = stickiesRes;
         this.saveLocal('cosmic_stickies', this.stickies);
       }
-      if (habitsRes && habitsRes.length > 0) {
-        this.habits = habitsRes;
-        this.saveLocal('cosmic_habits', this.habits);
+      if (mediaRes && mediaRes.length > 0) {
+        this.mediaQueue = mediaRes;
+        this.saveLocal('cosmic_media_queue', this.mediaQueue);
       }
       if (scratchpadRes && scratchpadRes.length > 0 && scratchpadRes[0].content !== undefined) {
         this.scratchpad = scratchpadRes[0].content;
         this.saveLocal('cosmic_scratchpad', this.scratchpad);
       }
+      if (positionsRes && positionsRes.length > 0) {
+        const posMap = {};
+        positionsRes.forEach(p => {
+          posMap[p.id] = { x: Number(p.x) || 0, y: Number(p.y) || 0, zIndex: Number(p.z_index) || 1 };
+        });
+        this.positions = posMap;
+        this.saveLocal('cosmic_box_positions', this.positions);
+      }
 
       this.isConnected = true;
-      updateDbStatus('connected', 'Neon DB Connected');
+      updateDbStatus('connected', 'Cloud Synced');
       renderAll();
+      applySavedPositions();
     } catch (err) {
-      console.warn('Neon Cloud DB sync warning:', err);
+      console.warn('Cloud DB sync notice:', err);
       this.isConnected = false;
       updateDbStatus('offline', 'Offline Mode (Local)');
+    }
+  }
+
+  // --- POSITIONS ACTIONS ---
+  async savePosition(boxId, x, y, zIndex = 1) {
+    if (!boxId) return;
+    if (!this.positions) this.positions = {};
+    this.positions[boxId] = { x, y, zIndex };
+    this.saveLocal('cosmic_box_positions', this.positions);
+
+    if (sql) {
+      try {
+        await sql`
+          INSERT INTO cosmic_positions (id, x, y, z_index, updated_at)
+          VALUES (${boxId}, ${x}, ${y}, ${zIndex}, NOW())
+          ON CONFLICT (id) DO UPDATE SET x = EXCLUDED.x, y = EXCLUDED.y, z_index = EXCLUDED.z_index, updated_at = NOW()
+        `;
+      } catch (err) {
+        console.error('Failed to save position in Cloud DB:', err);
+      }
+    }
+  }
+
+  async resetPositions() {
+    this.positions = {};
+    this.saveLocal('cosmic_box_positions', {});
+
+    // Clear transforms on DOM elements
+    document.querySelectorAll('.draggable-box').forEach(el => {
+      el.style.transform = '';
+      el.style.zIndex = '';
+    });
+
+    showToast('Positions reset to default grid', 'restart_alt');
+
+    if (sql) {
+      try {
+        await sql`DELETE FROM cosmic_positions`;
+        showToast('Saved to Cloud', 'cloud_done');
+      } catch (err) {
+        console.error('Failed to reset positions in Cloud DB:', err);
+      }
     }
   }
 
@@ -196,7 +227,7 @@ class CosmicStore {
     this.links.push(link);
     this.saveLocal('cosmic_links', this.links);
     renderLinks();
-    showToast('Bookmark added!', 'bookmark_add');
+    showToast('Bookmark pinned!', 'bookmark_add');
 
     if (sql) {
       try {
@@ -206,9 +237,9 @@ class CosmicStore {
                   (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM cosmic_links))
           ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, url = EXCLUDED.url
         `;
-        showToast('Saved to Neon DB', 'cloud_done');
+        showToast('Saved to Cloud', 'cloud_done');
       } catch (err) {
-        console.error('Failed to add link to Neon DB:', err);
+        console.error('Failed to add link to Cloud DB:', err);
       }
     }
   }
@@ -223,7 +254,7 @@ class CosmicStore {
       try {
         await sql`DELETE FROM cosmic_links WHERE id = ${linkId}`;
       } catch (err) {
-        console.error('Failed to delete link from Neon DB:', err);
+        console.error('Failed to delete link from Cloud DB:', err);
       }
     }
   }
@@ -239,14 +270,23 @@ class CosmicStore {
         try {
           await sql`UPDATE cosmic_links SET clicks = clicks + 1 WHERE id = ${linkId}`;
         } catch (err) {
-          console.error('Failed to update clicks in Neon DB:', err);
+          console.error('Failed to update clicks in Cloud DB:', err);
         }
       }
     }
   }
 
   async reorderLinks(newOrderedIds) {
-    this.links.sort((a, b) => newOrderedIds.indexOf(a.id) - newOrderedIds.indexOf(b.id));
+    const newLinks = [];
+    newOrderedIds.forEach(id => {
+      const found = this.links.find(l => l.id === id);
+      if (found) newLinks.push(found);
+    });
+    // Append any not present
+    this.links.forEach(l => {
+      if (!newOrderedIds.includes(l.id)) newLinks.push(l);
+    });
+    this.links = newLinks;
     this.saveLocal('cosmic_links', this.links);
 
     if (sql) {
@@ -254,8 +294,9 @@ class CosmicStore {
         for (let i = 0; i < newOrderedIds.length; i++) {
           await sql`UPDATE cosmic_links SET sort_order = ${i + 1} WHERE id = ${newOrderedIds[i]}`;
         }
+        showToast('Saved to Cloud', 'cloud_done');
       } catch (err) {
-        console.error('Failed to reorder links in Neon DB:', err);
+        console.error('Failed to reorder links in Cloud DB:', err);
       }
     }
   }
@@ -276,9 +317,9 @@ class CosmicStore {
                   (SELECT COALESCE(MIN(sort_order), 0) - 1 FROM cosmic_todos))
           ON CONFLICT (id) DO NOTHING
         `;
-        showToast('Task saved to Neon DB', 'cloud_done');
+        showToast('Saved to Cloud', 'cloud_done');
       } catch (err) {
-        console.error('Failed to add todo to Neon DB:', err);
+        console.error('Failed to add todo to Cloud DB:', err);
       }
     }
   }
@@ -295,7 +336,7 @@ class CosmicStore {
         try {
           await sql`UPDATE cosmic_todos SET completed = ${completed} WHERE id = ${todoId}`;
         } catch (err) {
-          console.error('Failed to toggle todo in Neon DB:', err);
+          console.error('Failed to toggle todo in Cloud DB:', err);
         }
       }
     }
@@ -312,7 +353,7 @@ class CosmicStore {
       try {
         await sql`DELETE FROM cosmic_todos WHERE id = ${todoId}`;
       } catch (err) {
-        console.error('Failed to delete todo from Neon DB:', err);
+        console.error('Failed to delete todo from Cloud DB:', err);
       }
     }
   }
@@ -332,9 +373,9 @@ class CosmicStore {
                   (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM cosmic_stickies))
           ON CONFLICT (id) DO NOTHING
         `;
-        showToast('Saved to Neon DB', 'cloud_done');
+        showToast('Saved to Cloud', 'cloud_done');
       } catch (err) {
-        console.error('Failed to add sticky to Neon DB:', err);
+        console.error('Failed to add sticky to Cloud DB:', err);
       }
     }
   }
@@ -350,9 +391,9 @@ class CosmicStore {
       if (sql) {
         try {
           await sql`UPDATE cosmic_stickies SET content = ${newContent} WHERE id = ${stickyId}`;
-          showToast('Updated in Neon DB', 'cloud_done');
+          showToast('Updated in Cloud', 'cloud_done');
         } catch (err) {
-          console.error('Failed to edit sticky in Neon DB:', err);
+          console.error('Failed to edit sticky in Cloud DB:', err);
         }
       }
     }
@@ -368,43 +409,44 @@ class CosmicStore {
       try {
         await sql`DELETE FROM cosmic_stickies WHERE id = ${stickyId}`;
       } catch (err) {
-        console.error('Failed to delete sticky from Neon DB:', err);
+        console.error('Failed to delete sticky from Cloud DB:', err);
       }
     }
   }
 
-  async reorderStickies(newOrderedIds) {
-    this.stickies.sort((a, b) => newOrderedIds.indexOf(a.id) - newOrderedIds.indexOf(b.id));
-    this.saveLocal('cosmic_stickies', this.stickies);
+  // --- MEDIA QUEUE ACTIONS ---
+  async addMediaItem(item) {
+    this.mediaQueue.push(item);
+    this.saveLocal('cosmic_media_queue', this.mediaQueue);
+    renderMediaQueue();
+    showToast('Added to Media Queue!', 'playlist_add');
 
     if (sql) {
       try {
-        for (let i = 0; i < newOrderedIds.length; i++) {
-          await sql`UPDATE cosmic_stickies SET sort_order = ${i + 1} WHERE id = ${newOrderedIds[i]}`;
-        }
+        await sql`
+          INSERT INTO cosmic_media_queue (id, title, url, category, sort_order)
+          VALUES (${item.id}, ${item.title}, ${item.url}, ${item.category}, 
+                  (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM cosmic_media_queue))
+          ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, url = EXCLUDED.url
+        `;
+        showToast('Saved to Cloud', 'cloud_done');
       } catch (err) {
-        console.error('Failed to reorder stickies in Neon DB:', err);
+        console.error('Failed to add media queue item to Cloud DB:', err);
       }
     }
   }
 
-  // --- HABITS ACTIONS ---
-  async toggleHabit(habitId) {
-    const habit = this.habits.find(h => h.id === habitId);
-    if (habit) {
-      habit.completed = !habit.completed;
-      if (habit.completed) habit.streak += 1;
-      else habit.streak = Math.max(0, habit.streak - 1);
+  async deleteMediaItem(itemId) {
+    this.mediaQueue = this.mediaQueue.filter(m => m.id !== itemId);
+    this.saveLocal('cosmic_media_queue', this.mediaQueue);
+    renderMediaQueue();
+    showToast('Queue item removed', 'delete');
 
-      this.saveLocal('cosmic_habits', this.habits);
-      renderHabits();
-
-      if (sql) {
-        try {
-          await sql`UPDATE cosmic_habits SET completed = ${habit.completed}, streak = ${habit.streak} WHERE id = ${habitId}`;
-        } catch (err) {
-          console.error('Failed to update habit in Neon DB:', err);
-        }
+    if (sql) {
+      try {
+        await sql`DELETE FROM cosmic_media_queue WHERE id = ${itemId}`;
+      } catch (err) {
+        console.error('Failed to delete media item from Cloud DB:', err);
       }
     }
   }
@@ -422,7 +464,7 @@ class CosmicStore {
           ON CONFLICT (id) DO UPDATE SET content = EXCLUDED.content, updated_at = NOW()
         `;
       } catch (err) {
-        console.error('Failed to save scratchpad in Neon DB:', err);
+        console.error('Failed to save scratchpad in Cloud DB:', err);
       }
     }
   }
@@ -430,7 +472,7 @@ class CosmicStore {
 
 const store = new CosmicStore();
 
-// UI Update Helpers
+// ----------------- UI STATUS & TOAST HELPERS -----------------
 function updateDbStatus(state, label) {
   const dot = document.getElementById('neonDbDot');
   const text = document.getElementById('neonDbText');
@@ -477,18 +519,50 @@ function showToast(message, icon = 'check_circle') {
   }, 2400);
 }
 
-// Initialize Dashboard UI
+// ----------------- SMART YOUTUBE MUSIC & PODCAST LAUNCHER -----------------
+/**
+ * Opens YouTube Music app on phone or desktop, with graceful fallback to web
+ */
+function launchYTMusic(path = '') {
+  const webUrl = 'https://music.youtube.com' + (path ? (path.startsWith('/') ? path : '/' + path) : '');
+  const cleanPath = path ? (path.startsWith('/') ? path.slice(1) : path) : '';
+  const appUrl = 'youtubemusic://' + cleanPath;
+
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  if (isMobile) {
+    // Attempt mobile deep-link scheme
+    window.location.href = appUrl;
+    setTimeout(() => {
+      window.open(webUrl, '_blank', 'noopener,noreferrer');
+    }, 1200);
+  } else {
+    // Attempt desktop protocol via hidden iframe
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = appUrl;
+    document.body.appendChild(iframe);
+    setTimeout(() => {
+      try { document.body.removeChild(iframe); } catch(e){}
+    }, 2000);
+    // Also open web interface in new tab
+    window.open(webUrl, '_blank', 'noopener,noreferrer');
+  }
+}
+
+// ----------------- INITIALIZATION -----------------
 document.addEventListener('DOMContentLoaded', () => {
   setupHeaderTime();
   renderAll();
+  setupBoxDragging();
+  setupBookmarkTileDragAndDrop();
   setupEventListeners();
-  setupDragAndDrop();
+  setupQuotes();
 
-  // Connect to Neon Cloud Database
+  // Connect & sync with Cloud Database
   store.syncFromNeon();
 });
 
-// Real-time Date
 function setupHeaderTime() {
   const dateBadge = document.getElementById('currentDateBadge');
   const now = new Date();
@@ -503,12 +577,172 @@ function renderAll() {
   renderLinks();
   renderTodos();
   renderStickies();
-  renderHabits();
+  renderMediaQueue();
   renderScratchpad();
+  renderQuote();
   updateTodoProgress();
 }
 
-// ----------------- LINKS SECTION -----------------
+// ----------------- APPLY SAVED COORDINATES -----------------
+function applySavedPositions() {
+  if (!store.positions) return;
+  Object.keys(store.positions).forEach(boxId => {
+    const el = document.querySelector(`[data-box-id="${boxId}"]`);
+    if (el) {
+      const pos = store.positions[boxId];
+      if (pos && (pos.x !== 0 || pos.y !== 0)) {
+        el.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+        if (pos.zIndex) el.style.zIndex = pos.zIndex;
+      }
+    }
+  });
+}
+
+// ----------------- ANY BOX DRAGGABLE ON CANVAS (COORDINATES PERSISTED) -----------------
+let highestZIndex = 20;
+
+function setupBoxDragging() {
+  const mainCanvas = document.getElementById('mainCorkboardCanvas');
+  if (!mainCanvas) return;
+
+  // Track active dragging box
+  let activeBox = null;
+  let startPointerX = 0;
+  let startPointerY = 0;
+  let startBoxX = 0;
+  let startBoxY = 0;
+  let isDraggingBox = false;
+
+  mainCanvas.addEventListener('pointerdown', (e) => {
+    // Drag initiation: click on box-drag-handle or designated header
+    const handle = e.target.closest('.box-drag-handle');
+    const stickyNote = e.target.closest('.sticky-note');
+    
+    // Either a drag handle or sticky note empty area
+    const box = handle ? handle.closest('.draggable-box') : (stickyNote && !e.target.closest('button, textarea, input') ? stickyNote : null);
+    if (!box) return;
+
+    activeBox = box;
+    const boxId = box.dataset.boxId || box.dataset.id;
+    if (!boxId) return;
+
+    highestZIndex += 1;
+    box.style.zIndex = highestZIndex;
+
+    // Get current transform translate values
+    const currentPos = store.positions[boxId] || { x: 0, y: 0 };
+    startBoxX = currentPos.x || 0;
+    startBoxY = currentPos.y || 0;
+
+    startPointerX = e.clientX;
+    startPointerY = e.clientY;
+    isDraggingBox = false;
+
+    // Capture pointer
+    try {
+      box.setPointerCapture(e.pointerId);
+    } catch(err){}
+  });
+
+  mainCanvas.addEventListener('pointermove', (e) => {
+    if (!activeBox) return;
+
+    const deltaX = e.clientX - startPointerX;
+    const deltaY = e.clientY - startPointerY;
+
+    // Threshold to prevent micro clicks from triggering drag
+    if (!isDraggingBox && (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3)) {
+      isDraggingBox = true;
+      activeBox.classList.add('is-box-dragging');
+    }
+
+    if (isDraggingBox) {
+      const newX = Math.round(startBoxX + deltaX);
+      const newY = Math.round(startBoxY + deltaY);
+      activeBox.style.transform = `translate(${newX}px, ${newY}px)`;
+    }
+  });
+
+  const stopBoxDrag = (e) => {
+    if (!activeBox) return;
+
+    if (isDraggingBox) {
+      const boxId = activeBox.dataset.boxId || activeBox.dataset.id;
+      const deltaX = e.clientX - startPointerX;
+      const deltaY = e.clientY - startPointerY;
+      const finalX = Math.round(startBoxX + deltaX);
+      const finalY = Math.round(startBoxY + deltaY);
+
+      store.savePosition(boxId, finalX, finalY, highestZIndex);
+      activeBox.classList.remove('is-box-dragging');
+    }
+
+    try {
+      activeBox.releasePointerCapture(e.pointerId);
+    } catch(err){}
+
+    activeBox = null;
+    isDraggingBox = false;
+  };
+
+  mainCanvas.addEventListener('pointerup', stopBoxDrag);
+  mainCanvas.addEventListener('pointercancel', stopBoxDrag);
+}
+
+// ----------------- MASTER BOOKMARKS GRID REORDERING (FIXED MULTI-COLUMN DRAG) -----------------
+function setupBookmarkTileDragAndDrop() {
+  const container = document.getElementById('linksGrid');
+  if (!container) return;
+
+  let draggedTile = null;
+
+  container.addEventListener('dragstart', (e) => {
+    const tile = e.target.closest('.bookmark-tile');
+    if (!tile) return;
+
+    draggedTile = tile;
+    tile.classList.add('is-drag-source');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', tile.dataset.id || '');
+  });
+
+  container.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    if (!draggedTile) return;
+
+    const targetTile = e.target.closest('.bookmark-tile');
+    if (!targetTile || targetTile === draggedTile) return;
+
+    // Multi-column grid drag math: check center of target tile
+    const rect = targetTile.getBoundingClientRect();
+    const midX = rect.left + rect.width / 2;
+    const midY = rect.top + rect.height / 2;
+
+    const isAfter = (e.clientY > midY) || (Math.abs(e.clientY - midY) < rect.height / 2 && e.clientX > midX);
+
+    if (isAfter) {
+      targetTile.after(draggedTile);
+    } else {
+      targetTile.before(draggedTile);
+    }
+  });
+
+  container.addEventListener('dragend', () => {
+    if (draggedTile) {
+      draggedTile.classList.remove('is-drag-source');
+      draggedTile = null;
+    }
+    document.querySelectorAll('.bookmark-tile.drag-over').forEach(el => el.classList.remove('drag-over'));
+
+    // Read new order from DOM
+    const newOrderedIds = Array.from(container.querySelectorAll('.bookmark-tile')).map(el => el.dataset.id).filter(Boolean);
+    if (newOrderedIds.length > 0) {
+      store.reorderLinks(newOrderedIds);
+    }
+  });
+}
+
+// ----------------- LINKS SECTION RENDERING -----------------
 function renderLinks() {
   const container = document.getElementById('linksGrid');
   if (!container) return;
@@ -526,7 +760,7 @@ function renderLinks() {
 
   filteredLinks.forEach(link => {
     const card = document.createElement('div');
-    card.className = 'neo-card p-3.5 flex flex-col justify-between group draggable-card cursor-pointer hover:border-primary transition-all';
+    card.className = 'neo-card p-3.5 flex flex-col justify-between group bookmark-tile cursor-pointer hover:border-primary transition-all';
     card.draggable = true;
     card.dataset.id = link.id;
 
@@ -557,7 +791,11 @@ function renderLinks() {
     `;
 
     // Click whole card to launch bookmark
+    let isClickDrag = false;
+    card.addEventListener('mousedown', () => { isClickDrag = false; });
+    card.addEventListener('mousemove', () => { isClickDrag = true; });
     card.addEventListener('click', (e) => {
+      if (isClickDrag) return;
       if (e.target.closest('.delete-link-btn')) return;
       store.incrementLinkClicks(link.id);
       window.open(link.url, '_blank', 'noopener,noreferrer');
@@ -583,7 +821,7 @@ function renderLinks() {
       <span class="material-symbols-outlined text-on-surface text-xl">add</span>
     </div>
     <span class="font-headline-sm font-bold text-xs text-on-surface">+ New Bookmark</span>
-    <span class="text-[10px] text-outline mt-0.5">Save to Neon DB</span>
+    <span class="text-[10px] text-outline mt-0.5">Persisted to Cloud</span>
   `;
   addTile.addEventListener('click', () => openModal('linkModal'));
   container.appendChild(addTile);
@@ -597,7 +835,7 @@ function formatHostname(url) {
   }
 }
 
-// ----------------- TO-DO SECTION -----------------
+// ----------------- TO-DO SECTION (STARTS CLEAN & EMPTY) -----------------
 function renderTodos() {
   const container = document.getElementById('todoListContainer');
   if (!container) return;
@@ -610,9 +848,10 @@ function renderTodos() {
 
   if (filteredTodos.length === 0) {
     container.innerHTML = `
-      <div class="p-6 text-center text-on-surface-variant font-medium">
+      <div class="p-6 text-center text-on-surface-variant font-medium rounded-xl border border-dashed border-on-surface/30">
         <span class="material-symbols-outlined text-3xl mb-1 text-primary">task_alt</span>
-        <p class="text-sm">No tasks in this view!</p>
+        <p class="text-sm font-bold text-on-surface">No tasks right now</p>
+        <p class="text-xs text-outline mt-1">Type below and press Enter to capture your to-do.</p>
       </div>
     `;
     return;
@@ -677,19 +916,33 @@ function updateTodoProgress() {
   }
 }
 
-// ----------------- STICKY NOTES SECTION -----------------
+// ----------------- STICKY NOTES SECTION (STARTS CLEAN & EMPTY) -----------------
 function renderStickies() {
   const container = document.getElementById('stickiesContainer');
   if (!container) return;
 
   container.innerHTML = '';
 
+  if (store.stickies.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full p-6 text-center rounded-2xl border-2 border-dashed border-on-surface/40 bg-white/50 flex flex-col items-center justify-center">
+        <span class="material-symbols-outlined text-3xl mb-1 text-secondary">push_pin</span>
+        <h4 class="font-headline-sm font-bold text-sm text-on-surface">No Sticky Notes Pinned</h4>
+        <p class="text-xs text-outline mt-1 mb-3">Click "+ New Memo" anytime to stick notes, checklists or ideas anywhere on your corkboard.</p>
+        <button onclick="openModal('stickyModal')" class="neo-btn neo-btn-lemon text-xs py-1.5 px-3">
+          + Pin First Memo
+        </button>
+      </div>
+    `;
+    return;
+  }
+
   store.stickies.forEach((sticky, idx) => {
     const card = document.createElement('div');
-    card.className = `sticky-note ${sticky.color || 'sticky-lemon'} draggable-card`;
+    card.className = `sticky-note ${sticky.color || 'sticky-lemon'} draggable-box`;
     card.style.transform = `rotate(${sticky.rotation || (idx % 2 === 0 ? '-1.5deg' : '1.5deg')})`;
-    card.draggable = true;
     card.dataset.id = sticky.id;
+    card.dataset.boxId = sticky.id;
 
     card.innerHTML = `
       <!-- Enamel Push Pin -->
@@ -734,41 +987,94 @@ function renderStickies() {
   });
 }
 
-// ----------------- HABITS SECTION -----------------
-function renderHabits() {
-  const container = document.getElementById('habitsGrid');
+// ----------------- MEDIA QUEUE & SYSTEM DESIGN RENDERING -----------------
+function renderMediaQueue() {
+  const container = document.getElementById('mediaQueueList');
   if (!container) return;
 
   container.innerHTML = '';
 
-  store.habits.forEach(habit => {
-    const card = document.createElement('div');
-    card.className = 'p-3 rounded-xl bg-surface-container-low border-2 border-on-surface shadow-[2px_2px_0px_#1a1a2e] flex flex-col justify-between cursor-pointer hover:-translate-y-0.5 transition-all';
+  if (store.mediaQueue.length === 0) {
+    container.innerHTML = `
+      <div class="p-2 text-center text-xs text-outline">Queue is empty. Click + to add system design links!</div>
+    `;
+    return;
+  }
+
+  store.mediaQueue.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'p-1.5 px-2 rounded-lg bg-surface-container-low border border-on-surface flex items-center justify-between gap-1.5 hover:bg-white transition-colors group';
     
-    card.innerHTML = `
-      <div class="flex items-center justify-between mb-1">
-        <span class="font-headline-sm text-xs font-bold uppercase truncate">${escapeHtml(habit.title)}</span>
-        <button class="habit-toggle-btn w-6 h-6 flex items-center justify-center rounded-full border border-on-surface ${habit.completed ? 'bg-[#45E5AA] text-on-surface' : 'bg-white text-outline'}">
-          <span class="material-symbols-outlined text-sm font-bold">${habit.completed ? 'check' : 'circle'}</span>
+    row.innerHTML = `
+      <div class="overflow-hidden flex-1 cursor-pointer">
+        <p class="text-[11px] font-bold text-on-surface truncate group-hover:text-primary transition-colors">${escapeHtml(item.title)}</p>
+        <span class="text-[9px] text-outline font-semibold">${escapeHtml(item.category || 'Tech')}</span>
+      </div>
+      <div class="flex items-center gap-1 shrink-0">
+        <a href="${item.url}" target="_blank" rel="noopener noreferrer" class="w-5 h-5 rounded flex items-center justify-center text-outline hover:text-red-600 transition-colors" title="Launch Video / Channel">
+          <span class="material-symbols-outlined text-xs">smart_display</span>
+        </a>
+        <button class="delete-media-btn w-5 h-5 rounded flex items-center justify-center text-outline hover:text-secondary opacity-50 group-hover:opacity-100 transition-opacity" data-id="${item.id}" title="Remove from queue">
+          <span class="material-symbols-outlined text-xs">close</span>
         </button>
-      </div>
-      <div class="my-1.5 flex items-baseline gap-1.5">
-        <span class="text-2xl font-bold font-headline-md text-on-surface">${habit.streak}</span>
-        <span class="text-[11px] text-on-surface-variant font-bold">days streak</span>
-      </div>
-      <div class="w-full bg-surface-container-high h-2.5 rounded-full border border-on-surface overflow-hidden">
-        <div class="h-full transition-all duration-300" style="width: ${habit.completed ? '100%' : '30%'}; background-color: ${habit.color || '#45E5AA'};"></div>
       </div>
     `;
 
-    // Toggle habit
-    card.querySelector('.habit-toggle-btn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      store.toggleHabit(habit.id);
+    // Click row opens video
+    row.querySelector('.overflow-hidden').addEventListener('click', () => {
+      window.open(item.url, '_blank', 'noopener,noreferrer');
     });
 
-    container.appendChild(card);
+    // Delete item
+    row.querySelector('.delete-media-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      store.deleteMediaItem(item.id);
+    });
+
+    container.appendChild(row);
   });
+}
+
+// ----------------- ELON MUSK QUOTES SECTION -----------------
+function setupQuotes() {
+  const nextBtn = document.getElementById('nextQuoteBtn');
+  const copyBtn = document.getElementById('copyQuoteBtn');
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      store.currentQuoteIndex = (store.currentQuoteIndex + 1) % ELON_QUOTES.length;
+      renderQuote(true);
+    });
+  }
+
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      const q = ELON_QUOTES[store.currentQuoteIndex];
+      navigator.clipboard.writeText(`“${q.text}” — Elon Musk`);
+      showToast('Quote copied to clipboard!', 'content_copy');
+    });
+  }
+}
+
+function renderQuote(animate = false) {
+  const textEl = document.getElementById('elonQuoteText');
+  const topicEl = document.getElementById('elonQuoteTopic');
+  if (!textEl) return;
+
+  const quote = ELON_QUOTES[store.currentQuoteIndex];
+  if (!quote) return;
+
+  if (animate) {
+    textEl.style.opacity = '0';
+    setTimeout(() => {
+      textEl.textContent = quote.text;
+      if (topicEl) topicEl.textContent = quote.topic;
+      textEl.style.opacity = '1';
+    }, 150);
+  } else {
+    textEl.textContent = quote.text;
+    if (topicEl) topicEl.textContent = quote.topic;
+  }
 }
 
 // ----------------- SCRATCHPAD SECTION -----------------
@@ -782,122 +1088,80 @@ function renderScratchpad() {
   textarea.addEventListener('input', () => {
     clearTimeout(saveTimeout);
     const saveIndicator = document.getElementById('autosaveBadge');
-    if (saveIndicator) saveIndicator.textContent = 'Saving to Neon DB...';
+    if (saveIndicator) saveIndicator.textContent = 'Saving to Cloud...';
 
     saveTimeout = setTimeout(() => {
       store.saveScratchpad(textarea.value);
-      if (saveIndicator) saveIndicator.textContent = 'Auto-saved to Neon DB';
+      if (saveIndicator) saveIndicator.textContent = 'Auto-saved';
     }, 600);
   });
-}
 
-// ----------------- DRAG AND DROP (MOVE STUFF) -----------------
-function setupDragAndDrop() {
-  let draggedEl = null;
-
-  document.addEventListener('dragstart', (e) => {
-    const card = e.target.closest('.draggable-card');
-    if (card) {
-      draggedEl = card;
-      card.classList.add('is-dragging');
-      e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', card.dataset.id || '');
-    }
-  });
-
-  document.addEventListener('dragend', () => {
-    if (draggedEl) {
-      draggedEl.classList.remove('is-dragging');
-      draggedEl = null;
-    }
-    document.querySelectorAll('.drop-target-active').forEach(el => el.classList.remove('drop-target-active'));
-  });
-
-  // Reordering stickies
-  const stickiesContainer = document.getElementById('stickiesContainer');
-  if (stickiesContainer) {
-    stickiesContainer.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      stickiesContainer.classList.add('drop-target-active');
-    });
-
-    stickiesContainer.addEventListener('dragleave', () => {
-      stickiesContainer.classList.remove('drop-target-active');
-    });
-
-    stickiesContainer.addEventListener('drop', (e) => {
-      e.preventDefault();
-      stickiesContainer.classList.remove('drop-target-active');
-      if (draggedEl && draggedEl.classList.contains('sticky-note')) {
-        const afterElement = getDragAfterElement(stickiesContainer, e.clientY);
-        if (afterElement == null) {
-          stickiesContainer.appendChild(draggedEl);
-        } else {
-          stickiesContainer.insertBefore(draggedEl, afterElement);
-        }
-        const newIds = Array.from(stickiesContainer.querySelectorAll('.sticky-note')).map(el => el.dataset.id);
-        store.reorderStickies(newIds);
+  const clearBtn = document.getElementById('clearScratchpadBtn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      if (confirm('Clear scratchpad text?')) {
+        textarea.value = '';
+        store.saveScratchpad('');
+        showToast('Scratchpad cleared', 'delete');
       }
     });
   }
 
-  // Reordering links
-  const linksGrid = document.getElementById('linksGrid');
-  if (linksGrid) {
-    linksGrid.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      linksGrid.classList.add('drop-target-active');
-    });
-
-    linksGrid.addEventListener('dragleave', () => {
-      linksGrid.classList.remove('drop-target-active');
-    });
-
-    linksGrid.addEventListener('drop', (e) => {
-      e.preventDefault();
-      linksGrid.classList.remove('drop-target-active');
-      if (draggedEl && draggedEl.classList.contains('neo-card')) {
-        const afterElement = getDragAfterElement(linksGrid, e.clientY);
-        if (afterElement == null) {
-          linksGrid.appendChild(draggedEl);
-        } else {
-          linksGrid.insertBefore(draggedEl, afterElement);
-        }
-        const newIds = Array.from(linksGrid.querySelectorAll('.neo-card')).map(el => el.dataset.id).filter(Boolean);
-        store.reorderLinks(newIds);
-      }
+  const copyBtn = document.getElementById('copyScratchpadBtn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(textarea.value);
+      showToast('Notes copied to clipboard!', 'content_copy');
     });
   }
-}
-
-function getDragAfterElement(container, y) {
-  const draggableElements = [...container.querySelectorAll('.draggable-card:not(.is-dragging)')];
-  return draggableElements.reduce((closest, child) => {
-    const box = child.getBoundingClientRect();
-    const offset = y - box.top - box.height / 2;
-    if (offset < 0 && offset > closest.offset) {
-      return { offset: offset, element: child };
-    } else {
-      return closest;
-    }
-  }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
 // ----------------- EVENT LISTENERS & FORMS -----------------
 function setupEventListeners() {
+  // Reset Layout Buttons (Banner & Sidebar)
+  const resetTop = document.getElementById('resetLayoutBtnTop');
+  const resetSide = document.getElementById('resetLayoutBtnSidebar');
+  const handleReset = () => {
+    if (confirm('Reset all boxes and cards back to the default grid?')) {
+      store.resetPositions();
+    }
+  };
+  if (resetTop) resetTop.addEventListener('click', handleReset);
+  if (resetSide) resetSide.addEventListener('click', handleReset);
+
+  // YouTube Music Launchers (Card & Header)
+  const openYtMusicBtn = document.getElementById('openYtMusicAppBtn');
+  if (openYtMusicBtn) {
+    openYtMusicBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showToast('Opening YouTube Music...', 'headphones');
+      launchYTMusic();
+    });
+  }
+
+  // Podcasts on YT Music
+  const openPodcastsBtn = document.getElementById('openPodcastsBtn');
+  if (openPodcastsBtn) {
+    openPodcastsBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showToast('Opening Podcasts on YT Music...', 'podcasts');
+      launchYTMusic('podcasts');
+    });
+  }
+
   // Manual Sync Button
   const syncBtn = document.getElementById('neonManualSyncBtn');
   if (syncBtn) {
     syncBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      showToast('Syncing with Neon DB...', 'sync');
+      showToast('Syncing with Cloud Database...', 'sync');
       store.syncFromNeon();
     });
   }
 
   // Open DB Settings Modal
   const dbStatusPill = document.getElementById('neonDbStatusPill');
-  const dbSidebarBadge = document.getElementById('neonSidebarStatusBadge');
+  const cloudDbCard = document.getElementById('cloudDbCard');
   const openDbSettings = () => {
     const input = document.getElementById('neonDbUrlInput');
     if (input) input.value = currentDbUrl || localStorage.getItem('cosmic_neon_db_url') || '';
@@ -905,10 +1169,7 @@ function setupEventListeners() {
   };
 
   if (dbStatusPill) dbStatusPill.addEventListener('click', openDbSettings);
-  if (dbSidebarBadge && dbSidebarBadge.parentElement) {
-    dbSidebarBadge.parentElement.addEventListener('click', openDbSettings);
-    dbSidebarBadge.parentElement.style.cursor = 'pointer';
-  }
+  if (cloudDbCard) cloudDbCard.addEventListener('click', openDbSettings);
 
   // Save DB URL
   const saveDbUrlBtn = document.getElementById('saveDbUrlBtn');
@@ -921,7 +1182,7 @@ function setupEventListeners() {
         currentDbUrl = val;
         sql = neon(val, { disableWarningInBrowsers: true });
         closeModal('dbModal');
-        showToast('Connected to Neon DB!', 'cloud_done');
+        showToast('Connected to Cloud Database!', 'cloud_done');
         await store.syncFromNeon();
       } else {
         alert('Please enter a valid postgresql:// connection URL');
@@ -937,7 +1198,7 @@ function setupEventListeners() {
       currentDbUrl = null;
       sql = null;
       closeModal('dbModal');
-      updateDbStatus('offline', 'Configure Neon DB');
+      updateDbStatus('offline', 'Configure Cloud DB');
       showToast('Reset to local mode', 'info');
     });
   }
@@ -1071,6 +1332,39 @@ function setupEventListeners() {
       closeModal('stickyModal');
       titleInput.value = '';
       contentInput.value = '';
+    });
+  }
+
+  // Add Media Queue Button & Form
+  const addMediaQueueBtn = document.getElementById('addMediaQueueBtn');
+  if (addMediaQueueBtn) {
+    addMediaQueueBtn.addEventListener('click', () => openModal('mediaQueueModal'));
+  }
+
+  const addMediaSubmitBtn = document.getElementById('addMediaSubmitBtn');
+  if (addMediaSubmitBtn) {
+    addMediaSubmitBtn.addEventListener('click', () => {
+      const titleInput = document.getElementById('newMediaTitle');
+      const urlInput = document.getElementById('newMediaUrl');
+      const categoryInput = document.getElementById('newMediaCategory');
+
+      let url = urlInput.value.trim();
+      if (!url) return;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+
+      store.addMediaItem({
+        id: 'q_' + Date.now(),
+        title: titleInput.value.trim() || formatHostname(url),
+        url: url,
+        category: categoryInput.value || 'System Design',
+        sort_order: store.mediaQueue.length + 1
+      });
+
+      closeModal('mediaQueueModal');
+      titleInput.value = '';
+      urlInput.value = '';
     });
   }
 

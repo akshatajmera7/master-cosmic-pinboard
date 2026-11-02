@@ -260,7 +260,7 @@ body {
 .sticky-peach { background-color: #ffc4a4; }
 .sticky-sky { background-color: #9fe7f5; }
 
-/* Drag and Drop Capabilities */
+/* Drag and Drop Capabilities & Coordinates Persistence */
 .draggable-card {
   cursor: grab;
 }
@@ -270,9 +270,64 @@ body {
 }
 
 .draggable-card.is-dragging {
-  opacity: 0.5;
-  transform: scale(0.98) rotate(-1deg);
+  opacity: 0.4;
+  transform: scale(0.96) rotate(-1deg);
   box-shadow: var(--neo-shadow-xl);
+}
+
+/* Any Box Draggable on Canvas with Coordinates */
+.draggable-box {
+  position: relative;
+  transition: box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1);
+  will-change: transform;
+}
+
+.draggable-box.is-box-dragging {
+  z-index: 1000 !important;
+  opacity: 0.95;
+  box-shadow: 0 20px 35px rgba(26, 26, 46, 0.28), 6px 6px 0px #1a1a2e !important;
+  cursor: grabbing !important;
+}
+
+.box-drag-handle {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1.5px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.box-drag-handle:hover {
+  background: rgba(26, 26, 46, 0.08);
+  border-color: rgba(26, 26, 46, 0.2);
+}
+
+.box-drag-handle:active {
+  cursor: grabbing;
+  background: rgba(26, 26, 46, 0.15);
+}
+
+/* Bookmark Grid Tile Dragging */
+.bookmark-tile {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.bookmark-tile.is-drag-source {
+  opacity: 0.35;
+  transform: scale(0.95);
+  border-style: dashed;
+}
+
+.bookmark-tile.drag-over {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px var(--primary-container), var(--neo-shadow-lg) !important;
+  transform: scale(1.02);
 }
 
 .drop-target-active {
@@ -280,6 +335,24 @@ body {
   outline-offset: 4px;
   background-color: rgba(108, 56, 255, 0.05);
 }
+
+/* Audio Equalizer Wave Animation */
+@keyframes eqBar {
+  0%, 100% { height: 4px; }
+  50% { height: 16px; }
+}
+
+.eq-bar {
+  display: inline-block;
+  width: 3px;
+  background-color: #45e5aa;
+  border-radius: 2px;
+  animation: eqBar 1.2s ease-in-out infinite;
+}
+.eq-bar:nth-child(2) { animation-delay: 0.2s; }
+.eq-bar:nth-child(3) { animation-delay: 0.4s; }
+.eq-bar:nth-child(4) { animation-delay: 0.1s; }
+
 
 /* Neo Pill Badges */
 .neo-pill {
