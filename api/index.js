@@ -1,5 +1,6 @@
-// Vercel Serverless Function Handler
-export default function handler(req, res) {
-  res.status(200).json({ status: 'ok', time: new Date().toISOString() });
-}
+  // Vercel Serverless Function - Root Handler / Proxy to Sync Handler
+  import syncHandler from './sync.js';
 
+  export default async function handler(req, res) {
+    return syncHandler(req, res);
+  }

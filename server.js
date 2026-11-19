@@ -2,6 +2,8 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import 'dotenv/config';
+import syncHandler from './api/sync.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,39 +23,61 @@ const MIME_TYPES = {
   '.woff2': 'font/woff2'
 };
 
-const server = http.createServer((req, res) => {
-  const reqUrl = new URL(req.url, `http://${req.headers.host}`);
-  let pathname = reqUrl.pathname;
+  const server = http.createServer(async (req, res) => {
+    const reqUrl = new URL(req.url, `http://${req.headers.host}`);
+    let pathname = reqUrl.pathname;
 
-  if (pathname === '/' || pathname === '') {
-    pathname = '/index.html';
-  }
-
-  // Prevent directory traversal
-  const safePath = path.normalize(pathname).replace(/^(\.\.[\/\\])+/, '');
-  const filePath = path.join(__dirname, safePath);
-
-  fs.stat(filePath, (err, stats) => {
-    if (err || !stats.isFile()) {
-      res.writeHead(404, { 'Content-Type': 'text/plain' });
-      res.end('404 Not Found');
+    // Handle API sync endpoints for local dev and testing
+    if (pathname === '/api/sync' || pathname === '/api' || pathname.startsWith('/api/')) {
+      try {
+        await syncHandler(req, res);
+      } catch (e) {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: e.message }));
+      }
       return;
     }
 
-    const ext = path.extname(filePath).toLowerCase();
-    const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+    if (pathname === '/' || pathname === '') {
+      pathname = '/index.html';
+    }
 
-    res.writeHead(200, {
-      'Content-Type': contentType,
-      'Cache-Control': 'no-cache'
+    // Prevent directory traversal
+    const safePath = path.normalize(pathname).replace(/^(\.\.[\/\\])+/, '');
+    const filePath = path.join(__dirname, safePath);
+
+    fs.stat(filePath, (err, stats) => {
+      if (err || !stats.isFile()) {
+        // Fallback for SPA routing to index.html
+        const indexPath = path.join(__dirname, 'index.html');
+        fs.stat(indexPath, (idxErr, idxStats) => {
+          if (!idxErr && idxStats.isFile()) {
+            res.writeHead(200, {
+              'Content-Type': 'text/html; charset=utf-8',
+              'Cache-Control': 'no-cache'
+            });
+            fs.createReadStream(indexPath).pipe(res);
+          } else {
+            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.end('404 Not Found');
+          }
+        });
+        return;
+      }
+
+      const ext = path.extname(filePath).toLowerCase();
+      const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+
+      res.writeHead(200, {
+        'Content-Type': contentType,
+        'Cache-Control': 'no-cache'
+      });
+
+      const stream = fs.createReadStream(filePath);
+      stream.pipe(res);
     });
-
-    const stream = fs.createReadStream(filePath);
-    stream.pipe(res);
   });
-});
 
-server.listen(PORT, () => {
-  console.log(`🪐 Cosmic Corkboard server running at http://localhost:${PORT}`);
-});
-
+  server.listen(PORT, () => {
+    console.log(`🪐 Cosmic Corkboard server running at http://localhost:${PORT}`);
+  });

@@ -1,19 +1,18 @@
 /**
  * Cosmic Corkboard - Daily Master Dashboard & Pinboard
- * Cloud PostgreSQL Persistence via Serverless HTTPS
+ * Hybrid Cloud Sync via Vercel Serverless API (/api/sync) and Direct HTTPS PostgreSQL
  */
 
 import { neon } from 'https://esm.sh/@neondatabase/serverless@0.10.4';
 
-// Secure Database Client Resolver
+// Database State
 let sql = null;
 let currentDbUrl = null;
 
 async function initNeonClient() {
-  // 1. Check user-configured URL in browser localStorage
+  // Check user-configured URL in browser's private localStorage
   let url = localStorage.getItem('cosmic_neon_db_url');
 
-  // 2. If not in localStorage, load from untracked config.js
   if (!url) {
     try {
       const config = await import('./config.js');
@@ -21,7 +20,7 @@ async function initNeonClient() {
         url = config.NEON_DB_URL;
       }
     } catch (e) {
-      // config.js is optional in standalone deployments
+      // config.js is optional in standalone/Vercel deployments
     }
   }
 
@@ -31,7 +30,7 @@ async function initNeonClient() {
       sql = neon(url, { disableWarningInBrowsers: true });
       return true;
     } catch (e) {
-      console.warn('Database client initialization error:', e);
+      console.warn('Direct client initialization notice:', e);
     }
   }
   return false;
@@ -39,26 +38,34 @@ async function initNeonClient() {
 
 // ----------------- DEFAULT SEED DATA -----------------
 
-// YouTube Music & Explore links included; Spotify & Figma removed as requested
+// YouTube Music & Explore links included; Spotify & Figma removed
 const DEFAULT_LINKS = [
-  { id: 'l1', title: 'Wordle (NYT)', url: 'https://www.nytimes.com/games/wordle/index.html', category: 'Games', icon: 'extension', color: '#45E5AA', clicks: 42 },
-  { id: 'l2', title: 'NYT Connections', url: 'https://www.nytimes.com/games/connections', category: 'Games', icon: 'grid_view', color: '#FBE85F', clicks: 29 },
+  { id: 'l_substack', title: 'Substack', url: 'https://substack.com', category: 'News', icon: 'newspaper', color: '#FF6719', clicks: 24 },
+  { id: 'l_krillion', title: 'Krillion', url: 'https://krillion.io', category: 'Tools', icon: 'hub', color: '#45E5AA', clicks: 12 },
+  { id: 'l_sporcle', title: 'Sporcle World Quiz', url: 'https://www.sporcle.com/games/g/world', category: 'Games', icon: 'public', color: '#FBE85F', clicks: 19 },
+  { id: 'l_chainle', title: 'Chainle', url: 'https://chainle.io', category: 'Games', icon: 'link', color: '#FF8C94', clicks: 14 },
   { id: 'l3', title: 'GitHub Dashboard', url: 'https://github.com', category: 'Dev', icon: 'terminal', color: '#6C38FF', clicks: 78 },
   { id: 'l4', title: 'YouTube Subscriptions', url: 'https://youtube.com', category: 'Media', icon: 'smart_display', color: '#FF5376', clicks: 64 },
   { id: 'l5', title: 'YouTube Music', url: 'https://music.youtube.com', category: 'Media', icon: 'headphones', color: '#FF0000', clicks: 53 },
   { id: 'l6', title: 'Hacker News', url: 'https://news.ycombinator.com', category: 'News', icon: 'newspaper', color: '#FF7139', clicks: 35 },
-  { id: 'l_krillion', title: 'Krillion', url: 'https://krillion.io', category: 'Tools', icon: 'hub', color: '#45E5AA', clicks: 12 },
-  { id: 'l_sporcle', title: 'Sporcle World Quiz', url: 'https://www.sporcle.com/games/g/world', category: 'Games', icon: 'public', color: '#FBE85F', clicks: 19 },
-  { id: 'l_substack', title: 'Substack', url: 'https://substack.com', category: 'News', icon: 'newspaper', color: '#FF6719', clicks: 24 },
   { id: 'l8', title: 'Notion Workspace', url: 'https://notion.so', category: 'Tools', icon: 'description', color: '#2F3437', clicks: 48 },
   { id: 'l9', title: 'Daily Chess Puzzle', url: 'https://www.chess.com/daily-chess-puzzle', category: 'Games', icon: 'sports_esports', color: '#D7C7FF', clicks: 17 },
   { id: 'l_lexicon', title: 'Lexicon Vocabulary', url: 'https://lexicon-vocabulary-phi.vercel.app/', category: 'Tools', icon: 'menu_book', color: '#45E5AA', clicks: 5 }
 ];
 
-// Master To-Dos start clean & empty as requested
+// Dedicated Daily Games & Puzzles (Wordle, Connections, Chainle, Sporcle, Chess)
+const DEFAULT_GAMES = [
+  { id: 'g_wordle', title: 'Wordle (NYT)', url: 'https://www.nytimes.com/games/wordle/index.html', category: 'Daily Word', icon: 'extension', color: '#45E5AA' },
+  { id: 'g_connections', title: 'NYT Connections', url: 'https://www.nytimes.com/games/connections', category: 'Word Association', icon: 'grid_view', color: '#FBE85F' },
+  { id: 'g_chainle', title: 'Chainle', url: 'https://chainle.io', category: 'Word Chain', icon: 'link', color: '#FF8C94' },
+  { id: 'g_sporcle', title: 'Sporcle World Quiz', url: 'https://www.sporcle.com/games/g/world', category: 'Geography', icon: 'public', color: '#D7C7FF' },
+  { id: 'g_chess', title: 'Daily Chess Puzzle', url: 'https://www.chess.com/daily-chess-puzzle', category: 'Strategy', icon: 'sports_esports', color: '#9fe7f5' }
+];
+
+// Master To-Dos start clean & empty
 const DEFAULT_TODOS = [];
 
-// Sticky notes start empty as requested
+// Sticky notes start clean & empty
 const DEFAULT_STICKIES = [];
 
 // Curated System Design & Tech Video Media Queue
@@ -82,13 +89,14 @@ const ELON_QUOTES = [
 
 const DEFAULT_SCRATCHPAD = `• Tactile digital mission control & master corkboard
 • Draggable cards with saved coordinates, link manager, and rapid todo capture
-• Everyday quick access: Wordle, Connections, YouTube Music, Podcasts, System Design
+• Everyday quick access: Wordle, Connections, Chainle, YouTube Music, Podcasts, System Design
 • Cloud synchronization active: all changes, positions, and notes sync seamlessly!`;
 
 // ----------------- MASTER STORE -----------------
 class CosmicStore {
   constructor() {
     this.links = this.loadLocal('cosmic_links', DEFAULT_LINKS);
+    this.games = this.loadLocal('cosmic_games', DEFAULT_GAMES);
     this.todos = this.loadLocal('cosmic_todos', DEFAULT_TODOS);
     this.stickies = this.loadLocal('cosmic_stickies', DEFAULT_STICKIES);
     this.mediaQueue = this.loadLocal('cosmic_media_queue', DEFAULT_MEDIA_QUEUE);
@@ -118,31 +126,113 @@ class CosmicStore {
     }
   }
 
-  // Sync entire store from Cloud Database
+  // Helper to post mutations to the Vercel API and direct Cloud DB
+  async postMutation(action, payload) {
+    const headers = { 'Content-Type': 'application/json' };
+    if (currentDbUrl) {
+      headers['x-database-url'] = currentDbUrl;
+    }
+
+    try {
+      const res = await fetch('/api/sync', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({ action, payload })
+      });
+      if (res.ok) {
+        showToast('Saved to Cloud', 'cloud_done');
+        return true;
+      }
+    } catch (err) {
+      // API call offline, direct SQL fallback will execute if available
+    }
+    return false;
+  }
+
+  // Sync entire store from Cloud Database (Vercel Serverless / Direct Neon)
   async syncFromNeon() {
+    updateDbStatus('syncing', 'Connecting...');
+
+    // Method 1: Fetch via Vercel Serverless Sync API (/api/sync)
+    try {
+      const headers = {};
+      if (currentDbUrl) {
+        headers['x-database-url'] = currentDbUrl;
+      }
+
+      const res = await fetch('/api/sync', { headers });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) {
+          const { links, games, todos, stickies, mediaQueue, scratchpad, positions } = json.data;
+          
+          if (Array.isArray(links)) {
+            this.links = links.filter(l => !l.title.toLowerCase().includes('figma'));
+            this.saveLocal('cosmic_links', this.links);
+          }
+          if (Array.isArray(games) && games.length > 0) {
+            this.games = games;
+            this.saveLocal('cosmic_games', this.games);
+          }
+          if (Array.isArray(todos)) {
+            this.todos = todos;
+            this.saveLocal('cosmic_todos', this.todos);
+          }
+          if (Array.isArray(stickies)) {
+            this.stickies = stickies;
+            this.saveLocal('cosmic_stickies', this.stickies);
+          }
+          if (Array.isArray(mediaQueue) && mediaQueue.length > 0) {
+            this.mediaQueue = mediaQueue;
+            this.saveLocal('cosmic_media_queue', this.mediaQueue);
+          }
+          if (typeof scratchpad === 'string') {
+            this.scratchpad = scratchpad;
+            this.saveLocal('cosmic_scratchpad', this.scratchpad);
+          }
+          if (positions && typeof positions === 'object') {
+            this.positions = positions;
+            this.saveLocal('cosmic_box_positions', this.positions);
+          }
+
+          this.isConnected = true;
+          updateDbStatus('connected', 'Cloud Synced');
+          renderAll();
+          applySavedPositions();
+          return;
+        }
+      }
+    } catch (apiErr) {
+      console.info('API Sync endpoint offline, attempting direct connection...');
+    }
+
+    // Method 2: Direct browser-to-Neon connection (fallback)
     if (!sql) {
       const ok = await initNeonClient();
       if (!ok) {
-        updateDbStatus('offline', 'Configure Cloud DB');
+        updateDbStatus('offline', 'Offline Mode (Local)');
         return;
       }
     }
-    updateDbStatus('syncing', 'Connecting...');
 
     try {
-      const [linksRes, todosRes, stickiesRes, mediaRes, scratchpadRes, positionsRes] = await Promise.all([
+      const [linksRes, todosRes, stickiesRes, mediaRes, scratchpadRes, positionsRes, gamesRes] = await Promise.all([
         sql`SELECT id, title, url, category, icon, color, clicks, sort_order FROM cosmic_links ORDER BY sort_order ASC, created_at ASC`,
         sql`SELECT id, text, tag, priority, completed, timestamp, sort_order FROM cosmic_todos ORDER BY sort_order ASC, created_at DESC`,
         sql`SELECT id, title, tag, content, color, rotation, pin_color AS "pinColor", sort_order FROM cosmic_stickies ORDER BY sort_order ASC, created_at ASC`,
         sql`SELECT id, title, url, category, sort_order FROM cosmic_media_queue ORDER BY sort_order ASC, created_at ASC`,
         sql`SELECT content FROM cosmic_scratchpad WHERE id = 'main' LIMIT 1`,
-        sql`SELECT id, x, y, z_index FROM cosmic_positions`
+        sql`SELECT id, x, y, z_index FROM cosmic_positions`,
+        sql`SELECT id, title, url, category, icon, color, sort_order FROM cosmic_games ORDER BY sort_order ASC, created_at ASC`
       ]);
 
       if (linksRes && linksRes.length > 0) {
-        // Filter out any lingering figma links
         this.links = linksRes.filter(l => !l.title.toLowerCase().includes('figma'));
         this.saveLocal('cosmic_links', this.links);
+      }
+      if (gamesRes && gamesRes.length > 0) {
+        this.games = gamesRes;
+        this.saveLocal('cosmic_games', this.games);
       }
       if (todosRes) {
         this.todos = todosRes;
@@ -174,7 +264,7 @@ class CosmicStore {
       renderAll();
       applySavedPositions();
     } catch (err) {
-      console.warn('Cloud DB sync notice:', err);
+      console.warn('Cloud DB direct sync notice:', err);
       this.isConnected = false;
       updateDbStatus('offline', 'Offline Mode (Local)');
     }
@@ -187,7 +277,8 @@ class CosmicStore {
     this.positions[boxId] = { x, y, zIndex };
     this.saveLocal('cosmic_box_positions', this.positions);
 
-    if (sql) {
+    const ok = await this.postMutation('savePosition', { id: boxId, x, y, zIndex });
+    if (!ok && sql) {
       try {
         await sql`
           INSERT INTO cosmic_positions (id, x, y, z_index, updated_at)
@@ -195,7 +286,7 @@ class CosmicStore {
           ON CONFLICT (id) DO UPDATE SET x = EXCLUDED.x, y = EXCLUDED.y, z_index = EXCLUDED.z_index, updated_at = NOW()
         `;
       } catch (err) {
-        console.error('Failed to save position in Cloud DB:', err);
+        console.error('Failed to save position:', err);
       }
     }
   }
@@ -212,12 +303,52 @@ class CosmicStore {
 
     showToast('Positions reset to default grid', 'restart_alt');
 
-    if (sql) {
+    const ok = await this.postMutation('resetPositions', {});
+    if (!ok && sql) {
       try {
         await sql`DELETE FROM cosmic_positions`;
         showToast('Saved to Cloud', 'cloud_done');
       } catch (err) {
-        console.error('Failed to reset positions in Cloud DB:', err);
+        console.error('Failed to reset positions:', err);
+      }
+    }
+  }
+
+  // --- GAMES ACTIONS ---
+  async addGame(game) {
+    this.games.push(game);
+    this.saveLocal('cosmic_games', this.games);
+    renderGames();
+    showToast('Game added to shelf!', 'sports_esports');
+
+    const ok = await this.postMutation('addGame', game);
+    if (!ok && sql) {
+      try {
+        await sql`
+          INSERT INTO cosmic_games (id, title, url, category, icon, color, sort_order)
+          VALUES (${game.id}, ${game.title}, ${game.url}, ${game.category}, ${game.icon || 'sports_esports'}, ${game.color || '#45E5AA'}, 
+                  (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM cosmic_games))
+          ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, url = EXCLUDED.url
+        `;
+        showToast('Saved to Cloud', 'cloud_done');
+      } catch (err) {
+        console.error('Failed to add game:', err);
+      }
+    }
+  }
+
+  async deleteGame(gameId) {
+    this.games = this.games.filter(g => g.id !== gameId);
+    this.saveLocal('cosmic_games', this.games);
+    renderGames();
+    showToast('Game removed', 'delete');
+
+    const ok = await this.postMutation('deleteGame', { id: gameId });
+    if (!ok && sql) {
+      try {
+        await sql`DELETE FROM cosmic_games WHERE id = ${gameId}`;
+      } catch (err) {
+        console.error('Failed to delete game:', err);
       }
     }
   }
@@ -229,7 +360,8 @@ class CosmicStore {
     renderLinks();
     showToast('Bookmark pinned!', 'bookmark_add');
 
-    if (sql) {
+    const ok = await this.postMutation('addLink', link);
+    if (!ok && sql) {
       try {
         await sql`
           INSERT INTO cosmic_links (id, title, url, category, icon, color, clicks, sort_order)
@@ -239,7 +371,7 @@ class CosmicStore {
         `;
         showToast('Saved to Cloud', 'cloud_done');
       } catch (err) {
-        console.error('Failed to add link to Cloud DB:', err);
+        console.error('Failed to add link:', err);
       }
     }
   }
@@ -250,11 +382,12 @@ class CosmicStore {
     renderLinks();
     showToast('Link removed', 'delete');
 
-    if (sql) {
+    const ok = await this.postMutation('deleteLink', { id: linkId });
+    if (!ok && sql) {
       try {
         await sql`DELETE FROM cosmic_links WHERE id = ${linkId}`;
       } catch (err) {
-        console.error('Failed to delete link from Cloud DB:', err);
+        console.error('Failed to delete link:', err);
       }
     }
   }
@@ -266,11 +399,12 @@ class CosmicStore {
       this.saveLocal('cosmic_links', this.links);
       renderLinks();
 
-      if (sql) {
+      const ok = await this.postMutation('incrementLinkClicks', { id: linkId });
+      if (!ok && sql) {
         try {
           await sql`UPDATE cosmic_links SET clicks = clicks + 1 WHERE id = ${linkId}`;
         } catch (err) {
-          console.error('Failed to update clicks in Cloud DB:', err);
+          console.error('Failed to update clicks:', err);
         }
       }
     }
@@ -282,21 +416,21 @@ class CosmicStore {
       const found = this.links.find(l => l.id === id);
       if (found) newLinks.push(found);
     });
-    // Append any not present
     this.links.forEach(l => {
       if (!newOrderedIds.includes(l.id)) newLinks.push(l);
     });
     this.links = newLinks;
     this.saveLocal('cosmic_links', this.links);
 
-    if (sql) {
+    const ok = await this.postMutation('reorderLinks', { ids: newOrderedIds });
+    if (!ok && sql) {
       try {
         for (let i = 0; i < newOrderedIds.length; i++) {
           await sql`UPDATE cosmic_links SET sort_order = ${i + 1} WHERE id = ${newOrderedIds[i]}`;
         }
         showToast('Saved to Cloud', 'cloud_done');
       } catch (err) {
-        console.error('Failed to reorder links in Cloud DB:', err);
+        console.error('Failed to reorder links:', err);
       }
     }
   }
@@ -309,17 +443,17 @@ class CosmicStore {
     updateTodoProgress();
     showToast('Task added!', 'add_task');
 
-    if (sql) {
+    const ok = await this.postMutation('addTodo', todo);
+    if (!ok && sql) {
       try {
         await sql`
           INSERT INTO cosmic_todos (id, text, tag, priority, completed, timestamp, sort_order)
-          VALUES (${todo.id}, ${todo.text}, ${todo.tag}, ${todo.priority}, ${todo.completed}, ${todo.timestamp}, 
-                  (SELECT COALESCE(MIN(sort_order), 0) - 1 FROM cosmic_todos))
-          ON CONFLICT (id) DO NOTHING
+          VALUES (${todo.id}, ${todo.text}, ${todo.tag}, ${todo.priority}, ${todo.completed}, ${todo.timestamp}, 1)
+          ON CONFLICT (id) DO UPDATE SET text = EXCLUDED.text, completed = EXCLUDED.completed
         `;
         showToast('Saved to Cloud', 'cloud_done');
       } catch (err) {
-        console.error('Failed to add todo to Cloud DB:', err);
+        console.error('Failed to save todo:', err);
       }
     }
   }
@@ -332,11 +466,12 @@ class CosmicStore {
       renderTodos();
       updateTodoProgress();
 
-      if (sql) {
+      const ok = await this.postMutation('toggleTodo', { id: todoId, completed });
+      if (!ok && sql) {
         try {
           await sql`UPDATE cosmic_todos SET completed = ${completed} WHERE id = ${todoId}`;
         } catch (err) {
-          console.error('Failed to toggle todo in Cloud DB:', err);
+          console.error('Failed to toggle todo:', err);
         }
       }
     }
@@ -347,13 +482,14 @@ class CosmicStore {
     this.saveLocal('cosmic_todos', this.todos);
     renderTodos();
     updateTodoProgress();
-    showToast('Task deleted', 'delete');
+    showToast('Task removed', 'delete');
 
-    if (sql) {
+    const ok = await this.postMutation('deleteTodo', { id: todoId });
+    if (!ok && sql) {
       try {
         await sql`DELETE FROM cosmic_todos WHERE id = ${todoId}`;
       } catch (err) {
-        console.error('Failed to delete todo from Cloud DB:', err);
+        console.error('Failed to delete todo:', err);
       }
     }
   }
@@ -365,17 +501,18 @@ class CosmicStore {
     renderStickies();
     showToast('Memo pinned to corkboard!', 'push_pin');
 
-    if (sql) {
+    const ok = await this.postMutation('addSticky', sticky);
+    if (!ok && sql) {
       try {
         await sql`
           INSERT INTO cosmic_stickies (id, title, tag, content, color, rotation, pin_color, sort_order)
           VALUES (${sticky.id}, ${sticky.title}, ${sticky.tag}, ${sticky.content}, ${sticky.color}, ${sticky.rotation}, ${sticky.pinColor}, 
                   (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM cosmic_stickies))
-          ON CONFLICT (id) DO NOTHING
+          ON CONFLICT (id) DO UPDATE SET content = EXCLUDED.content
         `;
         showToast('Saved to Cloud', 'cloud_done');
       } catch (err) {
-        console.error('Failed to add sticky to Cloud DB:', err);
+        console.error('Failed to save sticky:', err);
       }
     }
   }
@@ -386,14 +523,14 @@ class CosmicStore {
       sticky.content = newContent;
       this.saveLocal('cosmic_stickies', this.stickies);
       renderStickies();
-      showToast('Memo updated!', 'check');
+      showToast('Memo updated', 'edit');
 
-      if (sql) {
+      const ok = await this.postMutation('editSticky', { id: stickyId, content: newContent });
+      if (!ok && sql) {
         try {
           await sql`UPDATE cosmic_stickies SET content = ${newContent} WHERE id = ${stickyId}`;
-          showToast('Updated in Cloud', 'cloud_done');
         } catch (err) {
-          console.error('Failed to edit sticky in Cloud DB:', err);
+          console.error('Failed to update sticky:', err);
         }
       }
     }
@@ -405,11 +542,12 @@ class CosmicStore {
     renderStickies();
     showToast('Memo unpinned', 'delete');
 
-    if (sql) {
+    const ok = await this.postMutation('deleteSticky', { id: stickyId });
+    if (!ok && sql) {
       try {
         await sql`DELETE FROM cosmic_stickies WHERE id = ${stickyId}`;
       } catch (err) {
-        console.error('Failed to delete sticky from Cloud DB:', err);
+        console.error('Failed to delete sticky:', err);
       }
     }
   }
@@ -419,19 +557,19 @@ class CosmicStore {
     this.mediaQueue.push(item);
     this.saveLocal('cosmic_media_queue', this.mediaQueue);
     renderMediaQueue();
-    showToast('Added to Media Queue!', 'playlist_add');
+    showToast('Video added to queue!', 'smart_display');
 
-    if (sql) {
+    const ok = await this.postMutation('addMediaItem', item);
+    if (!ok && sql) {
       try {
         await sql`
           INSERT INTO cosmic_media_queue (id, title, url, category, sort_order)
-          VALUES (${item.id}, ${item.title}, ${item.url}, ${item.category}, 
-                  (SELECT COALESCE(MAX(sort_order), 0) + 1 FROM cosmic_media_queue))
+          VALUES (${item.id}, ${item.title}, ${item.url}, ${item.category}, ${item.sort_order || 1})
           ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, url = EXCLUDED.url
         `;
         showToast('Saved to Cloud', 'cloud_done');
       } catch (err) {
-        console.error('Failed to add media queue item to Cloud DB:', err);
+        console.error('Failed to add media item:', err);
       }
     }
   }
@@ -440,13 +578,14 @@ class CosmicStore {
     this.mediaQueue = this.mediaQueue.filter(m => m.id !== itemId);
     this.saveLocal('cosmic_media_queue', this.mediaQueue);
     renderMediaQueue();
-    showToast('Queue item removed', 'delete');
+    showToast('Item removed from queue', 'delete');
 
-    if (sql) {
+    const ok = await this.postMutation('deleteMediaItem', { id: itemId });
+    if (!ok && sql) {
       try {
         await sql`DELETE FROM cosmic_media_queue WHERE id = ${itemId}`;
       } catch (err) {
-        console.error('Failed to delete media item from Cloud DB:', err);
+        console.error('Failed to delete media item:', err);
       }
     }
   }
@@ -456,7 +595,8 @@ class CosmicStore {
     this.scratchpad = text;
     this.saveLocal('cosmic_scratchpad', this.scratchpad);
 
-    if (sql) {
+    const ok = await this.postMutation('saveScratchpad', { content: text });
+    if (!ok && sql) {
       try {
         await sql`
           INSERT INTO cosmic_scratchpad (id, content, updated_at)
@@ -464,7 +604,7 @@ class CosmicStore {
           ON CONFLICT (id) DO UPDATE SET content = EXCLUDED.content, updated_at = NOW()
         `;
       } catch (err) {
-        console.error('Failed to save scratchpad in Cloud DB:', err);
+        console.error('Failed to save scratchpad:', err);
       }
     }
   }
@@ -521,33 +661,15 @@ function showToast(message, icon = 'check_circle') {
 
 // ----------------- SMART YOUTUBE MUSIC & PODCAST LAUNCHER -----------------
 /**
- * Opens YouTube Music app on phone or desktop, with graceful fallback to web
+ * Opens YouTube Music app on phone or desktop directly without opening browser tabs
  */
 function launchYTMusic(path = '') {
-  const webUrl = 'https://music.youtube.com' + (path ? (path.startsWith('/') ? path : '/' + path) : '');
   const cleanPath = path ? (path.startsWith('/') ? path.slice(1) : path) : '';
   const appUrl = 'youtubemusic://' + cleanPath;
 
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-  if (isMobile) {
-    // Attempt mobile deep-link scheme
-    window.location.href = appUrl;
-    setTimeout(() => {
-      window.open(webUrl, '_blank', 'noopener,noreferrer');
-    }, 1200);
-  } else {
-    // Attempt desktop protocol via hidden iframe
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.src = appUrl;
-    document.body.appendChild(iframe);
-    setTimeout(() => {
-      try { document.body.removeChild(iframe); } catch(e){}
-    }, 2000);
-    // Also open web interface in new tab
-    window.open(webUrl, '_blank', 'noopener,noreferrer');
-  }
+  showToast('Opening YouTube Music app...', 'headphones');
+  // Directly invoke the OS protocol handler so only the native app opens
+  window.location.href = appUrl;
 }
 
 // ----------------- INITIALIZATION -----------------
@@ -556,10 +678,11 @@ document.addEventListener('DOMContentLoaded', () => {
   renderAll();
   setupBoxDragging();
   setupBookmarkTileDragAndDrop();
+  setupNavSmoothScrolling();
   setupEventListeners();
   setupQuotes();
 
-  // Connect & sync with Cloud Database
+  // Connect & sync with Cloud Database via Vercel Serverless API
   store.syncFromNeon();
 });
 
@@ -575,6 +698,7 @@ function setupHeaderTime() {
 // Master Render
 function renderAll() {
   renderLinks();
+  renderGames();
   renderTodos();
   renderStickies();
   renderMediaQueue();
@@ -689,6 +813,79 @@ function setupBoxDragging() {
   mainCanvas.addEventListener('pointercancel', stopBoxDrag);
 }
 
+// ----------------- MAIN NAVBAR SMOOTH SCROLLING -----------------
+function setupNavSmoothScrolling() {
+  const mainCanvas = document.getElementById('mainCorkboardCanvas');
+  if (!mainCanvas) return;
+
+  const navLinks = document.querySelectorAll('.nav-tab-link, #sidebarNavLinks a');
+
+  function setActiveNavLink(hash) {
+    if (!hash) return;
+    document.querySelectorAll('.nav-tab-link').forEach(link => {
+      const isMatch = link.getAttribute('href') === hash;
+      if (isMatch) {
+        link.className = 'nav-tab-link text-primary border-b-2 border-primary pb-1 font-bold text-xs font-label uppercase tracking-wider hover:-translate-y-0.5 transition-all';
+      } else {
+        link.className = 'nav-tab-link text-on-surface-variant hover:text-on-surface font-label font-bold text-xs uppercase tracking-wider hover:-translate-y-0.5 transition-all';
+      }
+    });
+
+    document.querySelectorAll('#sidebarNavLinks a').forEach(link => {
+      const isMatch = link.getAttribute('href') === hash;
+      if (isMatch) {
+        link.className = 'flex items-center gap-2.5 px-3 py-2 rounded-lg bg-tertiary-fixed text-on-surface font-bold text-xs border-2 border-on-surface shadow-[2px_2px_0px_#1a1a2e] hover:-translate-y-0.5 transition-transform';
+      } else {
+        link.className = 'flex items-center gap-2.5 px-3 py-2 rounded-lg text-on-surface-variant hover:bg-white hover:text-on-surface font-bold text-xs transition-colors';
+      }
+    });
+  }
+
+  navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      const href = link.getAttribute('href');
+      if (!href || !href.startsWith('#') || href === '#') return;
+      e.preventDefault();
+
+      const targetId = href.substring(1);
+      const targetEl = document.getElementById(targetId);
+      if (targetEl) {
+        const canvasRect = mainCanvas.getBoundingClientRect();
+        const targetRect = targetEl.getBoundingClientRect();
+        const scrollOffset = targetRect.top - canvasRect.top + mainCanvas.scrollTop - 24;
+
+        mainCanvas.scrollTo({
+          top: Math.max(0, scrollOffset),
+          behavior: 'smooth'
+        });
+
+        setActiveNavLink(href);
+      }
+    });
+  });
+
+  // Scroll spy on mainCorkboardCanvas
+  let scrollTimeout;
+  mainCanvas.addEventListener('scroll', () => {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      const sections = ['rituals', 'games', 'mindset', 'stickies', 'tasks', 'scratchpad', 'bookmarks'];
+      const canvasRect = mainCanvas.getBoundingClientRect();
+
+      for (const id of sections) {
+        const el = document.getElementById(id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top - canvasRect.top <= 200 && rect.bottom - canvasRect.top >= 50) {
+            setActiveNavLink('#' + id);
+            break;
+          }
+        }
+      }
+    }, 60);
+  });
+}
+
 // ----------------- MASTER BOOKMARKS GRID REORDERING (FIXED MULTI-COLUMN DRAG) -----------------
 function setupBookmarkTileDragAndDrop() {
   const container = document.getElementById('linksGrid');
@@ -739,6 +936,81 @@ function setupBookmarkTileDragAndDrop() {
     if (newOrderedIds.length > 0) {
       store.reorderLinks(newOrderedIds);
     }
+  });
+}
+
+// ----------------- DAILY GAMES & PUZZLES RENDERING -----------------
+function renderGames() {
+  const container = document.getElementById('gamesGrid');
+  const countBadge = document.getElementById('gamesCountBadge');
+  if (!container) return;
+
+  if (countBadge) {
+    countBadge.textContent = `${store.games.length} Active`;
+  }
+
+  container.innerHTML = '';
+
+  if (store.games.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full p-6 text-center rounded-xl border border-dashed border-on-surface/30 bg-white/70">
+        <span class="material-symbols-outlined text-3xl mb-1 text-primary">sports_esports</span>
+        <p class="text-xs font-bold text-on-surface">No games currently added</p>
+        <p class="text-[11px] text-outline mt-0.5">Click "+ Add Game" to track Wordle, Chainle, Chess, or custom puzzles.</p>
+      </div>
+    `;
+    return;
+  }
+
+  store.games.forEach(game => {
+    const card = document.createElement('div');
+    card.className = 'neo-card p-4 relative flex flex-col justify-between bg-white group cursor-pointer hover:border-primary transition-all';
+    
+    card.innerHTML = `
+      <div class="washi-tape washi-tape-mint w-14 -top-2.5 left-5"></div>
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full" style="background-color: ${game.color || '#45E5AA'};"></span>
+            <span class="font-label font-bold text-[10px] uppercase text-on-surface tracking-wider">${escapeHtml(game.category || 'Puzzle')}</span>
+          </div>
+          <button class="delete-game-btn w-5 h-5 flex items-center justify-center text-outline hover:text-red-500 rounded hover:bg-surface-container opacity-60 group-hover:opacity-100 transition-all" data-id="${game.id}" title="Remove Game">
+            <span class="material-symbols-outlined text-xs">close</span>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2.5 my-2">
+          <div class="w-10 h-10 rounded-lg flex items-center justify-center border-2 border-on-surface shrink-0 shadow-[2px_2px_0px_#1a1a2e]" style="background-color: ${game.color || '#45E5AA'};">
+            <span class="material-symbols-outlined text-xl text-on-surface">${game.icon || 'sports_esports'}</span>
+          </div>
+          <div class="overflow-hidden">
+            <h4 class="font-bold text-xs truncate text-on-surface group-hover:text-primary transition-colors">${escapeHtml(game.title)}</h4>
+            <p class="text-[10px] text-outline truncate">${formatHostname(game.url)}</p>
+          </div>
+        </div>
+      </div>
+
+      <a href="${game.url}" target="_blank" rel="noopener noreferrer" class="neo-btn w-full text-center mt-2.5 text-xs py-1.5 flex items-center justify-center gap-1 shadow-[2px_2px_0px_#1a1a2e]" style="background-color: ${game.color || '#FBE85F'};">
+        <span>Play Game</span> <span class="material-symbols-outlined text-xs">arrow_outward</span>
+      </a>
+    `;
+
+    // Click whole card to launch game
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('.delete-game-btn') || e.target.closest('a')) return;
+      window.open(game.url, '_blank', 'noopener,noreferrer');
+    });
+
+    // Delete game
+    const deleteBtn = card.querySelector('.delete-game-btn');
+    deleteBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (confirm(`Remove "${game.title}" from your daily games?`)) {
+        store.deleteGame(game.id);
+      }
+    });
+
+    container.appendChild(card);
   });
 }
 
@@ -1129,23 +1401,61 @@ function setupEventListeners() {
   if (resetTop) resetTop.addEventListener('click', handleReset);
   if (resetSide) resetSide.addEventListener('click', handleReset);
 
-  // YouTube Music Launchers (Card & Header)
+  // YouTube Music Launchers (Card & Header) - Opens Native App ONLY
   const openYtMusicBtn = document.getElementById('openYtMusicAppBtn');
   if (openYtMusicBtn) {
     openYtMusicBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      showToast('Opening YouTube Music...', 'headphones');
       launchYTMusic();
     });
   }
 
-  // Podcasts on YT Music
+  // Podcasts on YT Music - Opens Native App ONLY
   const openPodcastsBtn = document.getElementById('openPodcastsBtn');
   if (openPodcastsBtn) {
     openPodcastsBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      showToast('Opening Podcasts on YT Music...', 'podcasts');
       launchYTMusic('podcasts');
+    });
+  }
+
+  // Add Game Modal Trigger & Form
+  const addNewGameBtn = document.getElementById('addNewGameBtn');
+  if (addNewGameBtn) {
+    addNewGameBtn.addEventListener('click', () => openModal('gameModal'));
+  }
+
+  const addGameSubmitBtn = document.getElementById('addGameSubmitBtn');
+  if (addGameSubmitBtn) {
+    addGameSubmitBtn.addEventListener('click', () => {
+      const titleInput = document.getElementById('newGameTitle');
+      const urlInput = document.getElementById('newGameUrl');
+      const categoryInput = document.getElementById('newGameCategory');
+      const colorInput = document.getElementById('newGameColor');
+
+      let url = urlInput ? urlInput.value.trim() : '';
+      if (!url) return;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+
+      const title = titleInput && titleInput.value.trim() ? titleInput.value.trim() : formatHostname(url);
+      const category = categoryInput && categoryInput.value.trim() ? categoryInput.value.trim() : 'Daily Game';
+      const color = colorInput ? colorInput.value : '#45E5AA';
+
+      store.addGame({
+        id: 'g_' + Date.now(),
+        title: title,
+        url: url,
+        category: category,
+        icon: 'sports_esports',
+        color: color
+      });
+
+      closeModal('gameModal');
+      if (titleInput) titleInput.value = '';
+      if (urlInput) urlInput.value = '';
+      if (categoryInput) categoryInput.value = '';
     });
   }
 
@@ -1399,3 +1709,6 @@ function escapeHtml(text) {
   div.textContent = text;
   return div.innerHTML;
 }
+
+// Export for module systems or inline use
+export { store, launchYTMusic };
